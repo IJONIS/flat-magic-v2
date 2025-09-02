@@ -1,0 +1,202 @@
+{
+  "worksheet_name": "Vorlage",
+  "dimensions": {
+    "max_row": 3,
+    "max_column": 243
+  },
+  "row_analysis": {
+    "row_1": {
+      "data": [
+        "TemplateType=fptcustom",
+        "Version=2025.0809",
+        "TemplateSignature=UEFOVFM=",
+        "settings=attributeRow=3&contentLanguageTag=de_DE&dataRow=4&feedType=113&headerLanguageTag=de_DE&isEdit=false&isProcessingSummary=false&labelRow=2&metadataVersion=MatprodVkxBUHJvZC0xMTQ0&primaryMarketplaceId=amzn1.mp.o.A1PA6795UKMFR9&ptds=UEFOVFM%3D&reportProvenance=false&templateIdentifier=d452e7c4-0b2e-4dac-ae3b-645cfbe401aa&timestamp=2025-08-09T16%3A31%3A44.038Z",
+        "     Fülle diese Vorlage auf DEUTSCH aus. Die farbigen Kopfzeilen dürfen NICHT verändert oder gelöscht werden. Um alle optionalen Spalten zu erweitern, klicke auf die Taste „2“ oben links.",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "non_empty_count": 5,
+      "purpose": "Template metadata and settings"
+    },
+    "row_2": {
+      "data": [
+        "Produkttyp",
+        "Verkäufer-SKU",
+        "Marke",
+        "Update / Löschen",
+        "Hersteller-Barcode  ",
+        "Barcode-Typ",
+        "Produktname",
+        "Produktbeschreibung",
+        "Produktkategorisierung (Suchpfad)",
+        "Hauptmaterial",
+        "Innenmaterial (Futter)",
+        "Pflegehinweis",
+        "Modellname",
+        "Modellnummer",
+        "Verschlussart/Schuh-Verschlussart",
+        "Artikelnummer",
+        "Temperaturbereich",
+        "Hersteller",
+        "gtin_exemption_reason",
+        "Sprache"
+      ],
+      "non_empty_count": 20,
+      "purpose": "Display names (localized labels)"
+    },
+    "row_3": {
+      "data": [
+        "feed_product_type",
+        "item_sku",
+        "brand_name",
+        "update_delete",
+        "external_product_id",
+        "external_product_id_type",
+        "item_name",
+        "product_description",
+        "recommended_browse_nodes",
+        "outer_material_type",
+        "inner_material_type",
+        "care_instructions",
+        "model_name",
+        "model",
+        "closure_type",
+        "part_number",
+        "temperature_rating",
+        "manufacturer",
+        "gtin_exemption_reason",
+        "language_value1"
+      ],
+      "non_empty_count": 20,
+      "purpose": "Technical field names"
+    }
+  },
+  "column_pair_mapping": {
+    "total_pairs": 20,
+    "pairs": [
+      {
+        "column_index": 1,
+        "display_name": "Produkttyp",
+        "technical_name": "feed_product_type"
+      },
+      {
+        "column_index": 2,
+        "display_name": "Verkäufer-SKU",
+        "technical_name": "item_sku"
+      },
+      {
+        "column_index": 3,
+        "display_name": "Marke",
+        "technical_name": "brand_name"
+      },
+      {
+        "column_index": 4,
+        "display_name": "Update / Löschen",
+        "technical_name": "update_delete"
+      },
+      {
+        "column_index": 5,
+        "display_name": "Hersteller-Barcode",
+        "technical_name": "external_product_id"
+      },
+      {
+        "column_index": 6,
+        "display_name": "Barcode-Typ",
+        "technical_name": "external_product_id_type"
+      },
+      {
+        "column_index": 7,
+        "display_name": "Produktname",
+        "technical_name": "item_name"
+      },
+      {
+        "column_index": 8,
+        "display_name": "Produktbeschreibung",
+        "technical_name": "product_description"
+      },
+      {
+        "column_index": 9,
+        "display_name": "Produktkategorisierung (Suchpfad)",
+        "technical_name": "recommended_browse_nodes"
+      },
+      {
+        "column_index": 10,
+        "display_name": "Hauptmaterial",
+        "technical_name": "outer_material_type"
+      },
+      {
+        "column_index": 11,
+        "display_name": "Innenmaterial (Futter)",
+        "technical_name": "inner_material_type"
+      },
+      {
+        "column_index": 12,
+        "display_name": "Pflegehinweis",
+        "technical_name": "care_instructions"
+      },
+      {
+        "column_index": 13,
+        "display_name": "Modellname",
+        "technical_name": "model_name"
+      },
+      {
+        "column_index": 14,
+        "display_name": "Modellnummer",
+        "technical_name": "model"
+      },
+      {
+        "column_index": 15,
+        "display_name": "Verschlussart/Schuh-Verschlussart",
+        "technical_name": "closure_type"
+      }
+    ],
+    "detection_pattern": {
+      "display_name_row": 2,
+      "technical_name_row": 3,
+      "data_start_row": 4
+    }
+  },
+  "template_structure": {
+    "identification_rules": {
+      "sheet_name": "Vorlage",
+      "alternative_names": [
+        "Template",
+        "Vorlagen"
+      ],
+      "structure_validation": [
+        "Row 1 contains template metadata starting with 'TemplateType='",
+        "Row 2 contains localized display names",
+        "Row 3 contains technical field names",
+        "Column count matches between rows 2 and 3"
+      ]
+    },
+    "extraction_rules": {
+      "display_names_location": {
+        "row": 2,
+        "start_column": 1
+      },
+      "technical_names_location": {
+        "row": 3,
+        "start_column": 1
+      },
+      "data_area_start": {
+        "row": 4,
+        "column": 1
+      },
+      "pairing_method": "column_index_based"
+    }
+  }
+}

@@ -1,0 +1,187 @@
+{
+  "worksheet_name": "Datendefinitionen",
+  "dimensions": {
+    "max_row": 167,
+    "max_column": 7
+  },
+  "header_analysis": {
+    "main_header": {
+      "row_number": 2,
+      "headers": [
+        "Gruppenname",
+        "Feldname",
+        "Lokale Bezeichnung",
+        "Definition und Verwendung",
+        "Gültige Werte",
+        "Beispiel",
+        "Pflichtfeld?"
+      ],
+      "column_mapping": {
+        "Feldname": {
+          "index": 1,
+          "type": "technical_name"
+        },
+        "Lokale Bezeichnung": {
+          "index": 2,
+          "type": "display_name"
+        },
+        "Definition und Verwendung": {
+          "index": 3,
+          "type": "description"
+        },
+        "Gültige Werte": {
+          "index": 4,
+          "type": "valid_values"
+        },
+        "Beispiel": {
+          "index": 5,
+          "type": "example"
+        },
+        "Pflichtfeld?": {
+          "index": 6,
+          "type": "required_flag"
+        }
+      }
+    }
+  },
+  "column_pair_detection": {
+    "technical_name_column": {
+      "index": 1,
+      "header": "Feldname",
+      "description": "Technical/system field name"
+    },
+    "display_name_column": {
+      "index": 2,
+      "header": "Lokale Bezeichnung",
+      "description": "Localized display name"
+    },
+    "confidence": 95
+  },
+  "data_patterns": {
+    "samples": [
+      {
+        "row_number": 4,
+        "technical_name": "feed_product_type",
+        "display_name": "Produkttyp",
+        "definition": "Spezifizieren Sie mit diesem Eintrag, um was für ein Produkt es sich handelt.",
+        "required": "Erforderlich"
+      },
+      {
+        "row_number": 5,
+        "technical_name": "item_sku",
+        "display_name": "Verkäufer-SKU",
+        "definition": "Lagerhaltungsnummer\n  \nEine eindeutige, vom Händler zugewiesene Kennung des Produkts. Die SKU muss für jedes aufgeführte Produkt eindeutig sein. Eine für ein Produkt eingerichtete SKU kann nur geändert werden, indem Sie zunächst das zugehörige Produkt durch einen Löschfeed aus unseren Systemen löschen und danach mit geänderter SKU neu einstellen. \n\nBei übergeordneten Vaterprodukten (parent) empfehlen wir die Verwendung eines entsprechenden Appendix (z.B. -PARENT)",
+        "required": "Erforderlich"
+      },
+      {
+        "row_number": 6,
+        "technical_name": "brand_name",
+        "display_name": "Marke",
+        "definition": "Marke\n\nMarke oder Hersteller des Produkts. Wird auf der Produktdetailseite angezeigt und wird für die optimale Kategorisierung verwendet.",
+        "required": "Erforderlich"
+      },
+      {
+        "row_number": 7,
+        "technical_name": "update_delete",
+        "display_name": "Update / Löschen",
+        "definition": "Gibt den Aktions-Typ des Vorgangs je Datensatz an: Update (Aktualisierung), PartialUpdate (Teilaktualisierung) oder Delete (Löschen), der für die bereitgestellten Daten ausgeführt werden soll. Falls kein Wert angegeben ist, wird als Standardverhalten Update festgelegt.  Benutzen Sie Update immer dann, wenn Sie existierende Produktdaten, Preise und Bestände aktualisieren möchten - auch, wenn Sie z.B. den Bestand Ihres Produktes auf Null setzen möchten. Verwenden Sie Delete nur dann, wenn Sie das betreffende Produkt permanent aus Ihrem Katalog entfernen möchten. \n\nSofern Sie eine bestehende SKU einem neuen Produkt zuweisen möchten und diese SKU in Ihrem SellerCentral-Konto noch existiert, löschen Sie erst die alte SKU mittels Delete und legen danach dann die neue Produktbeziehung an.",
+        "required": "Bevorzugt"
+      },
+      {
+        "row_number": 8,
+        "technical_name": "external_product_id",
+        "display_name": "Hersteller-Barcode",
+        "definition": "Hersteller - Barcode (EAN)\n\nEine standardmäßige alphanumerische Zeichenfolge, mit der das Produkt eindeutig identifiziert wird. Hierbei kann es sich um einen UPC, eine EAN oder eine GTIN handeln. Der product-id-Wert ist erforderlich, um einen neuen Artikel im Amazon-Katalog zu erstellen.\n\nIm Rahmen von Variationen darf dieses Feld bei übergeordneten Produkten (Parent) nicht gefüllt werden.",
+        "required": "Erforderlich"
+      },
+      {
+        "row_number": 9,
+        "technical_name": "external_product_id_type",
+        "display_name": "Barcode-Typ",
+        "definition": "Art des Hersteller - Barcodes\n\nDer Typ der standardmäßigen eindeutigen Kennung, die als Produkt-ID angegeben wurde. Dies ist ein erforderliches Feld, wenn die Produkt-ID angegeben wird. Der product-id-Wert ist erforderlich, um einen neuen Artikel im Amazon-Katalog zu erstellen\n\nIm Rahmen von Variationen darf dieses Feld bei übergeordneten Produkten (Parent) nicht gefüllt werden.",
+        "required": "Erforderlich"
+      },
+      {
+        "row_number": 10,
+        "technical_name": "item_name",
+        "display_name": "Produktname",
+        "definition": "Produktname\n\nTitel des Produkts, der auf der Produktdetailseite und in der Bestellung angezeigt wird. \n\nBitte beachten Sie unbedingt die folgende Namenkonvention: \n1) Parent-Titel= Marke + Produktbezeichnung + Produktname (z. B. Eterna Herrenhemd, halbarm) \n2) Child-Titel= Marke + Produktbezeichnung + Produktname + Variation (z. B. Eterna Herrenhemd,  halbarm, hellblau, Größe 38)\nFür weitere Richtlinien den Titel betreffend beachten Sie bitte den Kategorie-Styleguide der auf Seller Central zum Download bereit steht: https://sellercentral-europe.amazon.com/gp/help/help.html/ref=ag_200270100_cont_69024?ie=UTF8&itemID=200270100",
+        "required": "Erforderlich"
+      },
+      {
+        "row_number": 11,
+        "technical_name": "product_description",
+        "display_name": "Produktbeschreibung",
+        "definition": "Produktbeschreibung (Fließtext)\n\nEine Textbeschreibung des Produkts. \n\nWenn in Ihrer Excel-Tabelle für dieses Feld anstelle Ihres Textes \"####\"-Zeichen angezeigt werden, löschen Sie die Formatierung der Zelle. Klicken Sie hierzu im Excel-Menü auf \"Bearbeiten\", klicken Sie auf \"Löschen\" und anschließend auf \"Formate\".",
+        "required": "Optional"
+      },
+      {
+        "row_number": 12,
+        "technical_name": "recommended_browse_nodes",
+        "display_name": "Produktkategorisierung (Suchpfad)",
+        "definition": "Kategorienummer\n\nÜber diese numerische Kategorie-ID ordnen Sie Ihren Artikel einer detaillierten Katalog-Kategorie zu. Falls hier kein Werte bereitgestellt wird, kann Ihr Produkt in der Suchstruktur nicht gefunden werden.\n\nGeben Sie sowohl beim Parent- als auch Child-Produkt diese Kategorienummer an.\n\nSie finden die Klassifikationsliste (BTG) hier in Seller Central: https://sellercentral-europe.amazon.com/gp/help/1641/ref=ag_1641_cont_200700310",
+        "required": "Erforderlich"
+      },
+      {
+        "row_number": 13,
+        "technical_name": "outer_material_type",
+        "display_name": "Hauptmaterial",
+        "definition": "Obermaterial\n\nObermaterial des Schuhs bzw. Kleidungsstücks. Bitte benennen sie nur das Material, welches den größten Anteil des Kleidungsstückes einnimmt. \n\nDiese Informationen wird sowohl im grauen Bereich unter \"Details\" auf der Produktdailseite angezeigt, als auch für die Suche verwendet. \n\nDa Kunden ihre Suchergebnisse nach diesem Attribut filtern können, wird das Ausfüllen dieses Felds ausdrücklich empfohlen.",
+        "required": "Erforderlich"
+      }
+    ],
+    "total_pairs_found": 16
+  },
+  "detection_rules": {
+    "worksheet_identification": {
+      "target_sheet_name": "Datendefinitionen",
+      "alternative_names": [
+        "Data Definitions",
+        "Datendefinition",
+        "Field Definitions"
+      ],
+      "validation_criteria": [
+        "Sheet contains 'Feldname' and 'Lokale Bezeichnung' headers",
+        "Sheet has at least 7 columns",
+        "Sheet contains technical-to-display name mappings"
+      ]
+    },
+    "header_detection": {
+      "expected_header_row": 2,
+      "required_headers": [
+        "Feldname",
+        "Lokale Bezeichnung"
+      ],
+      "header_validation": "Check for exact or similar matches to required headers",
+      "fallback_detection": "Look for headers containing 'field', 'name', 'bezeichnung', 'technical', 'display'"
+    },
+    "column_pair_identification": {
+      "technical_name_column": {
+        "primary_indicator": "Feldname",
+        "fallback_indicators": [
+          "field_name",
+          "technical",
+          "system",
+          "attribute"
+        ],
+        "expected_content_pattern": "lowercase_with_underscores"
+      },
+      "display_name_column": {
+        "primary_indicator": "Lokale Bezeichnung",
+        "fallback_indicators": [
+          "display",
+          "label",
+          "local",
+          "bezeichnung"
+        ],
+        "expected_content_pattern": "human_readable_text"
+      }
+    },
+    "data_validation": {
+      "minimum_pairs": 10,
+      "non_empty_technical_name_required": true,
+      "non_empty_display_name_required": true,
+      "row_range": "Start from row 4, continue until empty rows"
+    }
+  }
+}

@@ -1,0 +1,916 @@
+{
+  "file_info": {
+    "filename": "PANTS.xlsm",
+    "total_worksheets": 10
+  },
+  "worksheets": {
+    "Instruktionen": {
+      "name": "Instruktionen",
+      "max_row": 60,
+      "max_column": 5,
+      "has_data": true,
+      "sample_headers": [
+        [
+          "\n⚠️ Wichtig! Diese Vorlage wurde geändert.",
+          "",
+          "\n⚠️ Important! This template has changed.",
+          "",
+          "\n⚠️ 重要须知！ 此模板已更改。"
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Was ändert sich?",
+          "",
+          "What is changing?",
+          "",
+          "有哪些变更内容？"
+        ],
+        [
+          "In der Standardansicht des Tabellenblatts \"Vorlagen\" werden die erforderlichen, bedingt erforderlichen und empfohlenen Attribute angezeigt. Bedingt erforderliche Attribute werden auf der Grundlage Ihrer Eingaben für erforderliche Attribute erforderlich. Optionale Attribute sind in jeder Attributgruppe minimiert. Sie können die optionalen Attribute erweitern, indem Sie auf die \"+\" oder \"-\"-Zeichen oben in der Spalte klicken (siehe Screenshot unten). Alternativ können Sie in der oberen linken Ecke des Blattes \"1\" oder \"2\" wählen, um alle optionalen Attribute ein- oder auszublenden. Option \"1\" zeigt die Standardansicht, bei der die optionalen Attribute minimiert sind, und Option \"2\" zeigt die erweiterte Ansicht, bei der alle Attribute erweitert sind. In der Standardansicht wird das erste Attribut in jeder Gruppe nicht ausgeblendet. Im nachstehenden Screenshot ist beispielsweise das Attribut \"Style\" in der Gruppe \"Discovery\" optional, aber nicht ausgeblendet. \nNachdem Sie den gewünschten Produkttyp für eine Zeile in der Vorlage ausgewählt haben, werden die Pflichtfelder in dieser Zeile ROT und die bedingten Pflichtfelder und empfohlenen Attribute ORANGE hervorgehoben.",
+          "",
+          "The default template tab view will show the required, conditionally required, and recommended attributes. Conditionally required attributes become required based on your inputs to the required attributes. Optional attributes are collapsed in each attribute group, and you can expand the optional attributes by clicking the \"+ or -\" signs on top of the column (refer the screenshot below). Alternatively, in the top left corner of the sheet, you can select \"1\" or \"2\" to collapse or expand all the optional attributes. Option \"1\" shows the default view which collapses optional attributes and option \"2\" shows the advanced view which expands all the attributes. The default view will not hide the first attribute in each group. For example, in the screenshot below, the \"Style\" attribute in the \"Discovery\" group is optional but not hidden. \nAfter selecting the desired Product Type for a row in the template, the required fields in that row will be highlighted in RED, and conditionally required fields and recommended attributes are highlighted in ORANGE.",
+          "",
+          "默认的“Template”选项卡视图将显示必填属性、有条件的必填属性和建议属性。根据您在必填属性中输入的信息，有条件的必填属性可能会变为必填属性。每个属性组中的可选属性会折叠起来，您可以通过点击列顶部的“+”或“-”符号展开或折叠可选属性（请参阅下面的屏幕截图）。或者，您可以选择工作表左上角的“1”或“2”，以折叠或展开所有可选属性。选项“1”显示的是默认视图，可选属性处于折叠状态，选项“2”显示的是高级视图，所有属性都已展开。默认视图不会隐藏每个组中的第一个属性。例如，在以下的屏幕截图中，“Discovery”组中的“Style”属性为可选属性，但不会被隐藏。为模板中的某行选择所需的商品类型后，该行中的必填字段将以红色高亮显示，有条件的必填字段和建议属性将以橙色高亮显示。"
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      ],
+      "potential_template_table": true
+    },
+    "Info zu Produktabbildungen": {
+      "name": "Info zu Produktabbildungen",
+      "max_row": 60,
+      "max_column": 2,
+      "has_data": true,
+      "sample_headers": [
+        [
+          "Bild-Richtlinien",
+          ""
+        ],
+        [
+          "",
+          ""
+        ],
+        [
+          "Jedes Produkt bei Amazon benötigt ein oder mehrere Bilder. Wählen Sie Bilder, die klar, gut erkennbar und leicht zu verstehen sind. Die Bilder müssen das Produkt korrekt darstellen, sollten möglichst viele Informationen liefern und das Produkt attraktiv präsentieren. Es darf nur das Produkt zu sehen sein, das verkauft wird, ohne zusätzliche Gegenstände. Texte, Logos und Bilder innerhalb von Bildern sind nicht erlaubt. Versuchen Sie möglichst, mehrere Bilder bereitzustellen, die das Produkte aus verschiedenen Blickwinkeln und in Detailansichten zeigen. Nutzen Sie die Chance, Ihr Produkt mit hochwertigen Bildern optimal zu präsentieren.",
+          ""
+        ],
+        [
+          "Wir behalten uns das Recht vor, Bilder nicht zu akzeptieren, die unsere Bild-Richtlinien nicht einhalten.",
+          ""
+        ],
+        [
+          "Es liegt in Ihrer Verantwortung sicherzustellen, dass Sie alle benötigten Rechte für die von Ihnen übermittelten Bildern besitzen.",
+          ""
+        ]
+      ],
+      "potential_template_table": false
+    },
+    "Beispiel": {
+      "name": "Beispiel",
+      "max_row": 63,
+      "max_column": 360,
+      "has_data": true,
+      "sample_headers": [
+        [
+          "1. Lesen Sie zusätzlich zu diesem Beispiel-Tab die Tabs Anweisungen und Datendefinitionen in dieser Datei. Prüfen Sie außerdem die Gültigen Werte.",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "2. Bitte beachten Sie, dass die folgenden Beispiele ausschließlich Demonstrationszwecken dienen. Abhängig von den ausgewählten Produkttypen sehen Sie in Ihrer tatsächlichen Vorlage möglicherweise andere Spalten. Um eine Lagerbestandsdatei zu erstellen, verwenden Sie den Tab Vorlage. ",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "3. Einige der optionalen Spalten werden zu Präsentationszwecken minimiert. Blenden Sie die ausgeblendeten Spalten wieder ein, indem Sie auf die Schaltfläche \"+\"  in der entsprechenden Spalte oder dem entsprechenden Abschnitt klicken.",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "4. Bitte beachten Sie, dass sich beim Herunterladen mehrerer Produkttypen in einer Vorlage die Anzahl der Spalten aufgrund der spezifischen Anforderungen für die einzelnen Produkttypen erhöht. Laden Sie weniger Produkttypen in einer Vorlage herunter, wenn Sie eine maßgeschneiderte Vorlage bevorzugen.",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "5. Fehler beim Übermitteln eines Produkteintrags (z. B.: Fehler 5661) können behoben werden, indem Sie den Verarbeitungsbericht herunterladen, sich die Hilfeseiten ansehen oder den Service für Verkaufspartner kontaktieren. ",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      ],
+      "potential_template_table": false
+    },
+    "Datendefinitionen": {
+      "name": "Datendefinitionen",
+      "max_row": 167,
+      "max_column": 7,
+      "has_data": true,
+      "sample_headers": [
+        [
+          "So vervollständigst du deine Lagerbestandsvorlage",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Gruppenname",
+          "Feldname",
+          "Lokale Bezeichnung",
+          "Definition und Verwendung",
+          "Gültige Werte",
+          "Beispiel",
+          "Pflichtfeld?"
+        ],
+        [
+          "Grundlegende - Grundlegende Produktinformationen - Dies sind Attribute, die wichtig für Käufer sind und für alle Ihre Artikel aufgefüllt werden sollten. Einige sind erforderlich, um ein Angebot zu erstellen.",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "",
+          "feed_product_type",
+          "Produkttyp",
+          "Spezifizieren Sie mit diesem Eintrag, um was für ein Produkt es sich handelt.",
+          "Wählen Sie den passenden Wert aus der Liste gültiger Werte. Diese finden Sie auf dem Tabellenblatt \"Gültige Werte\" und im Drop-down-Menü in der zugehörigen Spalte des Tabellenblatts \"Vorlage\".",
+          "AutoAccessoryMisc",
+          "Erforderlich"
+        ],
+        [
+          "",
+          "item_sku",
+          "Verkäufer-SKU",
+          "Lagerhaltungsnummer\n  \nEine eindeutige, vom Händler zugewiesene Kennung des Produkts. Die SKU muss für jedes aufgeführte Produkt eindeutig sein. Eine für ein Produkt eingerichtete SKU kann nur geändert werden, indem Sie zunächst das zugehörige Produkt durch einen Löschfeed aus unseren Systemen löschen und danach mit geänderter SKU neu einstellen. \n\nBei übergeordneten Vaterprodukten (parent) empfehlen wir die Verwendung eines entsprechenden Appendix (z.B. -PARENT)",
+          "Eindeutiger Bezeichner. Falls Sie keine SKU eingeben, wird eine SKU für Sie erstellt.",
+          "10162513-L\n10162513-M\n10162513-PARENT",
+          "Erforderlich"
+        ]
+      ],
+      "potential_template_table": true
+    },
+    "Dropdown Lists": {
+      "name": "Dropdown Lists",
+      "max_row": 546,
+      "max_column": 94,
+      "has_data": true,
+      "sample_headers": [
+        [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "",
+          "pants",
+          "pants",
+          "pants",
+          "pants",
+          "pants",
+          "pants",
+          "pants",
+          "pants",
+          "pants",
+          "pants",
+          "pants",
+          "pants",
+          "pants",
+          "pants",
+          "pants",
+          "pants",
+          "pants",
+          "pants",
+          "pants"
+        ],
+        [
+          "feed_product_type",
+          "relationship_type",
+          "age_range_description",
+          "is_autographed",
+          "item_width_unit_of_measure",
+          "is_expiration_dated_product",
+          "country_of_origin",
+          "inseam_length_unit_of_measure",
+          "bottoms_size_class",
+          "lithium_battery_packaging",
+          "external_product_id_type",
+          "variation_theme",
+          "target_gender",
+          "special_features1",
+          "closure_type",
+          "item_type_name",
+          "currency",
+          "sport_type1",
+          "bottoms_height_type",
+          "batteries_required"
+        ],
+        [
+          "pants",
+          "Accessory",
+          "Erwachsener",
+          "Ja",
+          "IN",
+          "Ja",
+          "Ägypten",
+          "Angstrom",
+          "Alter",
+          "Batterien enthalten",
+          "GTIN",
+          "ItemPackageQuantity-Material",
+          "Männlich",
+          "Balconette",
+          "Bindegürtel",
+          "Hosen-Set",
+          "JPY",
+          "Motorschlittenfahren",
+          "Regular",
+          "Yes"
+        ],
+        [
+          "",
+          "Variation",
+          "Baby",
+          "Nein",
+          "FT",
+          "Nein",
+          "Äquatorial-Guinea",
+          "Mils",
+          "Alphanumerisch",
+          "Batterien enthalten & eingesetzt",
+          "EAN",
+          "ItemPackageQuantity",
+          "Weiblich",
+          "Bustier",
+          "Druckknopf",
+          "Overall",
+          "MXN",
+          "Kajakfahren",
+          "Extra Tall",
+          "No"
+        ]
+      ],
+      "potential_template_table": false
+    },
+    "AttributePTDMAP": {
+      "name": "AttributePTDMAP",
+      "max_row": 254,
+      "max_column": 2,
+      "has_data": true,
+      "sample_headers": [
+        [
+          "",
+          "pants"
+        ],
+        [
+          "color_map",
+          "1"
+        ],
+        [
+          "item_sku",
+          "1"
+        ],
+        [
+          "country_of_origin",
+          "1"
+        ],
+        [
+          "fabric_type",
+          "1"
+        ]
+      ],
+      "potential_template_table": false
+    },
+    "Vorlage": {
+      "name": "Vorlage",
+      "max_row": 3,
+      "max_column": 243,
+      "has_data": true,
+      "sample_headers": [
+        [
+          "TemplateType=fptcustom",
+          "Version=2025.0809",
+          "TemplateSignature=UEFOVFM=",
+          "settings=attributeRow=3&contentLanguageTag=de_DE&dataRow=4&feedType=113&headerLanguageTag=de_DE&isEdit=false&isProcessingSummary=false&labelRow=2&metadataVersion=MatprodVkxBUHJvZC0xMTQ0&primaryMarketplaceId=amzn1.mp.o.A1PA6795UKMFR9&ptds=UEFOVFM%3D&reportProvenance=false&templateIdentifier=d452e7c4-0b2e-4dac-ae3b-645cfbe401aa&timestamp=2025-08-09T16%3A31%3A44.038Z",
+          "     Fülle diese Vorlage auf DEUTSCH aus. Die farbigen Kopfzeilen dürfen NICHT verändert oder gelöscht werden. Um alle optionalen Spalten zu erweitern, klicke auf die Taste „2“ oben links.",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Produkttyp",
+          "Verkäufer-SKU",
+          "Marke",
+          "Update / Löschen",
+          "Hersteller-Barcode  ",
+          "Barcode-Typ",
+          "Produktname",
+          "Produktbeschreibung",
+          "Produktkategorisierung (Suchpfad)",
+          "Hauptmaterial",
+          "Innenmaterial (Futter)",
+          "Pflegehinweis",
+          "Modellname",
+          "Modellnummer",
+          "Verschlussart/Schuh-Verschlussart",
+          "Artikelnummer",
+          "Temperaturbereich",
+          "Hersteller",
+          "gtin_exemption_reason",
+          "Sprache"
+        ],
+        [
+          "feed_product_type",
+          "item_sku",
+          "brand_name",
+          "update_delete",
+          "external_product_id",
+          "external_product_id_type",
+          "item_name",
+          "product_description",
+          "recommended_browse_nodes",
+          "outer_material_type",
+          "inner_material_type",
+          "care_instructions",
+          "model_name",
+          "model",
+          "closure_type",
+          "part_number",
+          "temperature_rating",
+          "manufacturer",
+          "gtin_exemption_reason",
+          "language_value1"
+        ]
+      ],
+      "potential_template_table": true
+    },
+    "Daten durchsuchen": {
+      "name": "Daten durchsuchen",
+      "max_row": 2,
+      "max_column": 2,
+      "has_data": true,
+      "sample_headers": [
+        [
+          "Browse Node",
+          "Pfad durchsuchen"
+        ],
+        [
+          "1981663031",
+          "Baumarkt > Sicherheitstechnik > Arbeitsschutzausrüstung > Bekleidung > Arbeitshosen"
+        ]
+      ],
+      "potential_template_table": false
+    },
+    "Conditions List": {
+      "name": "Conditions List",
+      "max_row": 1,
+      "max_column": 1,
+      "has_data": false,
+      "sample_headers": [
+        [
+          ""
+        ]
+      ],
+      "potential_template_table": false
+    },
+    "Gültige Werte": {
+      "name": "Gültige Werte",
+      "max_row": 93,
+      "max_column": 545,
+      "has_data": true,
+      "sample_headers": [
+        [
+          "Grundlegende",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "",
+          "Produkttyp",
+          "pants",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "",
+          "Marke",
+          "TMG INTERNATIONAL Textile Management Group",
+          "TMG",
+          "TMG Clothing",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "",
+          "Update / Löschen - [ pants ]",
+          "Aktualisierung",
+          "Partielle Aktualisierung",
+          "Löschung",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "",
+          "Barcode-Typ - [ pants ]",
+          "GTIN",
+          "EAN",
+          "GCID",
+          "UPC",
+          "ASIN",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      ],
+      "potential_template_table": false
+    }
+  },
+  "template_detection": {
+    "candidate_sheets": [
+      "Instruktionen",
+      "Datendefinitionen",
+      "Vorlage"
+    ],
+    "column_patterns": {
+      "Instruktionen": {
+        "header_row_candidates": [],
+        "column_pairs": [],
+        "data_patterns": {},
+        "validation_markers": []
+      },
+      "Datendefinitionen": {
+        "header_row_candidates": [
+          {
+            "row_number": 2,
+            "headers": [
+              "Gruppenname",
+              "Feldname",
+              "Lokale Bezeichnung",
+              "Definition und Verwendung",
+              "Gültige Werte",
+              "Beispiel",
+              "Pflichtfeld?"
+            ],
+            "non_empty_count": 7
+          },
+          {
+            "row_number": 4,
+            "headers": [
+              "",
+              "feed_product_type",
+              "Produkttyp",
+              "Spezifizieren Sie mit diesem Eintrag, um was für ein Produkt es sich handelt.",
+              "Wählen Sie den passenden Wert aus der Liste gültiger Werte. Diese finden Sie auf dem Tabellenblatt \"Gültige Werte\" und im Drop-down-Menü in der zugehörigen Spalte des Tabellenblatts \"Vorlage\".",
+              "AutoAccessoryMisc",
+              "Erforderlich"
+            ],
+            "non_empty_count": 6
+          },
+          {
+            "row_number": 5,
+            "headers": [
+              "",
+              "item_sku",
+              "Verkäufer-SKU",
+              "Lagerhaltungsnummer\n  \nEine eindeutige, vom Händler zugewiesene Kennung des Produkts. Die SKU muss für jedes aufgeführte Produkt eindeutig sein. Eine für ein Produkt eingerichtete SKU kann nur geändert werden, indem Sie zunächst das zugehörige Produkt durch einen Löschfeed aus unseren Systemen löschen und danach mit geänderter SKU neu einstellen. \n\nBei übergeordneten Vaterprodukten (parent) empfehlen wir die Verwendung eines entsprechenden Appendix (z.B. -PARENT)",
+              "Eindeutiger Bezeichner. Falls Sie keine SKU eingeben, wird eine SKU für Sie erstellt.",
+              "10162513-L\n10162513-M\n10162513-PARENT",
+              "Erforderlich"
+            ],
+            "non_empty_count": 6
+          }
+        ],
+        "column_pairs": [],
+        "data_patterns": {
+          "sample_rows": [
+            [
+              "Grundlegende - Grundlegende Produktinformationen - Dies sind Attribute, die wichtig für Käufer sind und für alle Ihre Artikel aufgefüllt werden sollten. Einige sind erforderlich, um ein Angebot zu erstellen.",
+              "",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            [
+              "",
+              "feed_product_type",
+              "Produkttyp",
+              "Spezifizieren Sie mit diesem Eintrag, um was für ein Produkt es sich handelt.",
+              "Wählen Sie den passenden Wert aus der Liste gültiger Werte. Diese finden Sie auf dem Tabellenblatt \"Gültige Werte\" und im Drop-down-Menü in der zugehörigen Spalte des Tabellenblatts \"Vorlage\".",
+              "AutoAccessoryMisc",
+              "Erforderlich"
+            ],
+            [
+              "",
+              "item_sku",
+              "Verkäufer-SKU",
+              "Lagerhaltungsnummer\n  \nEine eindeutige, vom Händler zugewiesene Kennung des Produkts. Die SKU muss für jedes aufgeführte Produkt eindeutig sein. Eine für ein Produkt eingerichtete SKU kann nur geändert werden, indem Sie zunächst das zugehörige Produkt durch einen Löschfeed aus unseren Systemen löschen und danach mit geänderter SKU neu einstellen. \n\nBei übergeordneten Vaterprodukten (parent) empfehlen wir die Verwendung eines entsprechenden Appendix (z.B. -PARENT)",
+              "Eindeutiger Bezeichner. Falls Sie keine SKU eingeben, wird eine SKU für Sie erstellt.",
+              "10162513-L\n10162513-M\n10162513-PARENT",
+              "Erforderlich"
+            ],
+            [
+              "",
+              "brand_name",
+              "Marke",
+              "Marke\n\nMarke oder Hersteller des Produkts. Wird auf der Produktdetailseite angezeigt und wird für die optimale Kategorisierung verwendet.",
+              "Eine alphanumerische Zeichenfolge mit einer Länge von mindestens einem und maximal 50 Zeichen.",
+              "Puma",
+              "Erforderlich"
+            ],
+            [
+              "",
+              "update_delete",
+              "Update / Löschen",
+              "Gibt den Aktions-Typ des Vorgangs je Datensatz an: Update (Aktualisierung), PartialUpdate (Teilaktualisierung) oder Delete (Löschen), der für die bereitgestellten Daten ausgeführt werden soll. Falls kein Wert angegeben ist, wird als Standardverhalten Update festgelegt.  Benutzen Sie Update immer dann, wenn Sie existierende Produktdaten, Preise und Bestände aktualisieren möchten - auch, wenn Sie z.B. den Bestand Ihres Produktes auf Null setzen möchten. Verwenden Sie Delete nur dann, wenn Sie das betreffende Produkt permanent aus Ihrem Katalog entfernen möchten. \n\nSofern Sie eine bestehende SKU einem neuen Produkt zuweisen möchten und diese SKU in Ihrem SellerCentral-Konto noch existiert, löschen Sie erst die alte SKU mittels Delete und legen danach dann die neue Produktbeziehung an.",
+              "Wählen Sie einen Wert aus der Liste der gültigen Werte.",
+              "Update",
+              "Bevorzugt"
+            ],
+            [
+              "",
+              "external_product_id",
+              "Hersteller-Barcode  ",
+              "Hersteller - Barcode (EAN)\n\nEine standardmäßige alphanumerische Zeichenfolge, mit der das Produkt eindeutig identifiziert wird. Hierbei kann es sich um einen UPC, eine EAN oder eine GTIN handeln. Der product-id-Wert ist erforderlich, um einen neuen Artikel im Amazon-Katalog zu erstellen.\n\nIm Rahmen von Variationen darf dieses Feld bei übergeordneten Produkten (Parent) nicht gefüllt werden.",
+              "Eine alphanumerische Zeichenfolge mit einer Länge von mindestens einem und maximal 16 Zeichen.",
+              "5279173125000",
+              "Erforderlich"
+            ],
+            [
+              "",
+              "external_product_id_type",
+              "Barcode-Typ",
+              "Art des Hersteller - Barcodes\n\nDer Typ der standardmäßigen eindeutigen Kennung, die als Produkt-ID angegeben wurde. Dies ist ein erforderliches Feld, wenn die Produkt-ID angegeben wird. Der product-id-Wert ist erforderlich, um einen neuen Artikel im Amazon-Katalog zu erstellen\n\nIm Rahmen von Variationen darf dieses Feld bei übergeordneten Produkten (Parent) nicht gefüllt werden.",
+              "Art des Hersteller - Barcodes\n\nDer Typ der standardmäßigen eindeutigen Kennung, die als Produkt-ID angegeben wurde. Dies ist ein erforderliches Feld, wenn die Produkt-ID angegeben wird. Der product-id-Wert ist erforderlich, um einen neuen Artikel im Amazon-Katalog zu erstellen\n\nIm Rahmen von Variationen darf dieses Feld bei übergeordneten Produkten (Parent) nicht gefüllt werden.",
+              "EAN",
+              "Erforderlich"
+            ],
+            [
+              "",
+              "item_name",
+              "Produktname",
+              "Produktname\n\nTitel des Produkts, der auf der Produktdetailseite und in der Bestellung angezeigt wird. \n\nBitte beachten Sie unbedingt die folgende Namenkonvention: \n1) Parent-Titel= Marke + Produktbezeichnung + Produktname (z. B. Eterna Herrenhemd, halbarm) \n2) Child-Titel= Marke + Produktbezeichnung + Produktname + Variation (z. B. Eterna Herrenhemd,  halbarm, hellblau, Größe 38)\nFür weitere Richtlinien den Titel betreffend beachten Sie bitte den Kategorie-Styleguide der auf Seller Central zum Download bereit steht: https://sellercentral-europe.amazon.com/gp/help/help.html/ref=ag_200270100_cont_69024?ie=UTF8&itemID=200270100",
+              "Eine alphanumerische Zeichenfolge mit einer Länge von mindestens einem und maximal 200 Zeichen. Hinweis: Erweiterte Type 1-ASCII-Zeichen (®, ©, ™ usw.) und andere Sonderzeichen werden nicht unterstützt.",
+              "Levi's Herren Jeans 506 Straight Fit, 74506",
+              "Erforderlich"
+            ],
+            [
+              "",
+              "product_description",
+              "Produktbeschreibung",
+              "Produktbeschreibung (Fließtext)\n\nEine Textbeschreibung des Produkts. \n\nWenn in Ihrer Excel-Tabelle für dieses Feld anstelle Ihres Textes \"####\"-Zeichen angezeigt werden, löschen Sie die Formatierung der Zelle. Klicken Sie hierzu im Excel-Menü auf \"Bearbeiten\", klicken Sie auf \"Löschen\" und anschließend auf \"Formate\".",
+              "Eine Textzeichenfolge mit einer Länge von maximal 2.000 Zeichen. Hinweis: Erweiterte Type 1-ASCII-Zeichen (®, ©, ™ usw.) und andere Sonderzeichen werden nicht unterstützt.\n\nVerwenden Sie keine echten Zeilenumbrüche in Ihrer Produkt-Beschreibung, diese müssen immer in Form von HTML-Zeilenumbrüchen angegeben werden (<br>). Bitte beachten Sie, dass keine anderen HTML-Kennzeichnungen verwendet werden dürfen.",
+              "Der Klassiker mit Kult-Status, der zu jeder Gelegenheit passt. 501, die Jeans-Legende mit Standard-Form und geradem Bein.",
+              "Optional"
+            ],
+            [
+              "",
+              "recommended_browse_nodes",
+              "Produktkategorisierung (Suchpfad)",
+              "Kategorienummer\n\nÜber diese numerische Kategorie-ID ordnen Sie Ihren Artikel einer detaillierten Katalog-Kategorie zu. Falls hier kein Werte bereitgestellt wird, kann Ihr Produkt in der Suchstruktur nicht gefunden werden.\n\nGeben Sie sowohl beim Parent- als auch Child-Produkt diese Kategorienummer an.\n\nSie finden die Klassifikationsliste (BTG) hier in Seller Central: https://sellercentral-europe.amazon.com/gp/help/1641/ref=ag_1641_cont_200700310",
+              "Feld ist mit einem Standardwert zu füllen: Eine positive ganze Zahl. Sie finden die Übersicht der möglichen Werte in der separaten \"Klassifikationsliste\" (Browse Tree Guide) Ihrer Produktkategorie.",
+              "2945",
+              "Erforderlich"
+            ]
+          ],
+          "non_empty_columns": [],
+          "data_types": {},
+          "row_count_estimate": 165
+        },
+        "validation_markers": []
+      },
+      "Vorlage": {
+        "header_row_candidates": [
+          {
+            "row_number": 1,
+            "headers": [
+              "TemplateType=fptcustom",
+              "Version=2025.0809",
+              "TemplateSignature=UEFOVFM=",
+              "settings=attributeRow=3&contentLanguageTag=de_DE&dataRow=4&feedType=113&headerLanguageTag=de_DE&isEdit=false&isProcessingSummary=false&labelRow=2&metadataVersion=MatprodVkxBUHJvZC0xMTQ0&primaryMarketplaceId=amzn1.mp.o.A1PA6795UKMFR9&ptds=UEFOVFM%3D&reportProvenance=false&templateIdentifier=d452e7c4-0b2e-4dac-ae3b-645cfbe401aa&timestamp=2025-08-09T16%3A31%3A44.038Z",
+              "     Fülle diese Vorlage auf DEUTSCH aus. Die farbigen Kopfzeilen dürfen NICHT verändert oder gelöscht werden. Um alle optionalen Spalten zu erweitern, klicke auf die Taste „2“ oben links.",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            "non_empty_count": 5
+          },
+          {
+            "row_number": 2,
+            "headers": [
+              "Produkttyp",
+              "Verkäufer-SKU",
+              "Marke",
+              "Update / Löschen",
+              "Hersteller-Barcode  ",
+              "Barcode-Typ",
+              "Produktname",
+              "Produktbeschreibung",
+              "Produktkategorisierung (Suchpfad)",
+              "Hauptmaterial",
+              "Innenmaterial (Futter)",
+              "Pflegehinweis",
+              "Modellname",
+              "Modellnummer",
+              "Verschlussart/Schuh-Verschlussart",
+              "Artikelnummer",
+              "Temperaturbereich",
+              "Hersteller",
+              "gtin_exemption_reason",
+              "Sprache"
+            ],
+            "non_empty_count": 20
+          },
+          {
+            "row_number": 3,
+            "headers": [
+              "feed_product_type",
+              "item_sku",
+              "brand_name",
+              "update_delete",
+              "external_product_id",
+              "external_product_id_type",
+              "item_name",
+              "product_description",
+              "recommended_browse_nodes",
+              "outer_material_type",
+              "inner_material_type",
+              "care_instructions",
+              "model_name",
+              "model",
+              "closure_type",
+              "part_number",
+              "temperature_rating",
+              "manufacturer",
+              "gtin_exemption_reason",
+              "language_value1"
+            ],
+            "non_empty_count": 20
+          }
+        ],
+        "column_pairs": [
+          {
+            "display_column": {
+              "index": 6,
+              "header": "Produktname"
+            },
+            "technical_column": {
+              "index": 4,
+              "header": "Hersteller-Barcode  "
+            },
+            "confidence": 10
+          }
+        ],
+        "data_patterns": {
+          "sample_rows": [
+            [
+              "feed_product_type",
+              "item_sku",
+              "brand_name",
+              "update_delete",
+              "external_product_id",
+              "external_product_id_type",
+              "item_name",
+              "product_description",
+              "recommended_browse_nodes",
+              "outer_material_type",
+              "inner_material_type",
+              "care_instructions",
+              "model_name",
+              "model",
+              "closure_type",
+              "part_number",
+              "temperature_rating",
+              "manufacturer",
+              "gtin_exemption_reason",
+              "language_value1"
+            ]
+          ],
+          "non_empty_columns": [],
+          "data_types": {},
+          "row_count_estimate": 1
+        },
+        "validation_markers": []
+      }
+    },
+    "detection_rules": {
+      "primary_detection": {
+        "worksheet_selection": "Find worksheet with template table indicators",
+        "header_identification": "Look for rows with display/technical column pairs",
+        "column_pair_detection": "Match display names with technical names"
+      },
+      "validation_criteria": [],
+      "implementation_guidance": {}
+    }
+  }
+}

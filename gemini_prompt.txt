@@ -1,0 +1,634 @@
+You are an expert e-commerce field categorization AI. Analyze these mandatory fields and categorize them into parent-level (shared across variants) vs variant-level (unique per variant).
+
+MANDATORY FIELDS TO ANALYZE:
+{
+  "feed_product_type": {
+    "display_name": "Produkttyp",
+    "data_type": "string",
+    "valid_values": [
+      "pants"
+    ],
+    "constraints": {
+      "value_count": 1,
+      "max_length": 5
+    }
+  },
+  "item_sku": {
+    "display_name": "Verk\u00e4ufer-SKU",
+    "data_type": "string",
+    "valid_values": [],
+    "constraints": {
+      "value_count": 0,
+      "max_length": null
+    }
+  },
+  "brand_name": {
+    "display_name": "Marke",
+    "data_type": "string",
+    "valid_values": [
+      "TMG INTERNATIONAL Textile Management Group",
+      "TMG Clothing",
+      "TMG"
+    ],
+    "constraints": {
+      "value_count": 3,
+      "max_length": 42
+    }
+  },
+  "external_product_id": {
+    "display_name": "Hersteller-Barcode",
+    "data_type": "string",
+    "valid_values": [],
+    "constraints": {
+      "value_count": 0,
+      "max_length": null
+    }
+  },
+  "external_product_id_type": {
+    "display_name": "Barcode-Typ",
+    "data_type": "string",
+    "valid_values": [
+      "EAN",
+      "GTIN",
+      "UPC",
+      "GCID",
+      "ASIN"
+    ],
+    "constraints": {
+      "value_count": 5,
+      "max_length": 4
+    }
+  },
+  "item_name": {
+    "display_name": "Produktname",
+    "data_type": "string",
+    "valid_values": [],
+    "constraints": {
+      "value_count": 0,
+      "max_length": null
+    }
+  },
+  "recommended_browse_nodes": {
+    "display_name": "Produktkategorisierung (Suchpfad)",
+    "data_type": "numeric",
+    "valid_values": [
+      "1981663031"
+    ],
+    "constraints": {
+      "value_count": 1,
+      "max_length": 10
+    }
+  },
+  "outer_material_type": {
+    "display_name": "Hauptmaterial",
+    "data_type": "string",
+    "valid_values": [
+      "Daunen",
+      "Baumwolle",
+      "Synthetisch",
+      "Jeans",
+      "Leder",
+      "Synthetik",
+      "Fellimitat",
+      "Fur",
+      "Kaschmir",
+      "Pelz",
+      "Samt",
+      "Leinen",
+      "Wildleder",
+      "Denim",
+      "Alpaka",
+      "Pailletten",
+      "Angorawolle",
+      "Glattleder",
+      "Satin",
+      "Cord",
+      "Kashmir",
+      "Fleece",
+      "Gummi",
+      "Angora",
+      "Mohair",
+      "Lackleder",
+      "Pelzimitat",
+      "Hanf",
+      "Seide",
+      "Wolle",
+      "Merino",
+      "Paillettenbesetzt",
+      "Filz"
+    ],
+    "constraints": {
+      "value_count": 33,
+      "max_length": 17
+    }
+  },
+  "standard_price": {
+    "display_name": "Preis",
+    "data_type": "string",
+    "valid_values": [],
+    "constraints": {
+      "value_count": 0,
+      "max_length": null
+    }
+  },
+  "quantity": {
+    "display_name": "Anzahl",
+    "data_type": "string",
+    "valid_values": [],
+    "constraints": {
+      "value_count": 0,
+      "max_length": null
+    }
+  },
+  "target_gender": {
+    "display_name": "Geschlecht",
+    "data_type": "string",
+    "valid_values": [
+      "Unisex",
+      "Weiblich",
+      "M\u00e4nnlich"
+    ],
+    "constraints": {
+      "value_count": 3,
+      "max_length": 8
+    }
+  },
+  "age_range_description": {
+    "display_name": "Altersgruppe Beschreibung",
+    "data_type": "string",
+    "valid_values": [
+      "Kind",
+      "Erwachsener",
+      "Kleinkind",
+      "Baby"
+    ],
+    "constraints": {
+      "value_count": 4,
+      "max_length": 11
+    }
+  },
+  "bottoms_size_system": {
+    "display_name": "Gr\u00f6\u00dfensystem des Artikels",
+    "data_type": "string",
+    "valid_values": [
+      "DE / NL / SE / PL"
+    ],
+    "constraints": {
+      "value_count": 1,
+      "max_length": 17
+    }
+  },
+  "bottoms_size_class": {
+    "display_name": "Gr\u00f6\u00dfenklassifizierung",
+    "data_type": "string",
+    "valid_values": [
+      "Alphanumerisch",
+      "Numerisch",
+      "Bundweite",
+      "Alter",
+      "Bundweite & Schrittl\u00e4nge"
+    ],
+    "constraints": {
+      "value_count": 5,
+      "max_length": 24
+    }
+  },
+  "main_image_url": {
+    "display_name": "URL des Hauptbilds",
+    "data_type": "string",
+    "valid_values": [],
+    "constraints": {
+      "value_count": 0,
+      "max_length": null
+    }
+  },
+  "color_map": {
+    "display_name": "Farbfamilie",
+    "data_type": "string",
+    "valid_values": [
+      "Wei\u00df",
+      "Gr\u00fcn",
+      "Metallisch",
+      "Blau",
+      "Rosa",
+      "Beige",
+      "Grau",
+      "Rot",
+      "Lila",
+      "Braun",
+      "T\u00fcrkis",
+      "Cremefarben",
+      "Bronze",
+      "Mehrfarbig",
+      "Silber",
+      "Violett",
+      "Orange",
+      "Gold",
+      "Schwarz",
+      "Durchsichtig",
+      "Gelb",
+      "Elfenbein"
+    ],
+    "constraints": {
+      "value_count": 22,
+      "max_length": 12
+    }
+  },
+  "color_name": {
+    "display_name": "Farbe",
+    "data_type": "string",
+    "valid_values": [],
+    "constraints": {
+      "value_count": 0,
+      "max_length": null
+    }
+  },
+  "size_name": {
+    "display_name": "Gr\u00f6\u00dfe",
+    "data_type": "string",
+    "valid_values": [],
+    "constraints": {
+      "value_count": 0,
+      "max_length": null
+    }
+  },
+  "department_name": {
+    "display_name": "Name der Abteilung",
+    "data_type": "string",
+    "valid_values": [
+      "Damen",
+      "Unisex Baby",
+      "Jungen",
+      "Herren",
+      "Baby - M\u00e4dchen",
+      "M\u00e4dchen",
+      "Unisex Kinder",
+      "Unisex",
+      "Baby - Jungen"
+    ],
+    "constraints": {
+      "value_count": 9,
+      "max_length": 14
+    }
+  },
+  "size_map": {
+    "display_name": "Gr\u00f6\u00dfenzuordnung",
+    "data_type": "numeric",
+    "valid_values": [
+      "44",
+      "27",
+      "35",
+      "48",
+      "62",
+      "70",
+      "36",
+      "47",
+      "64",
+      "22",
+      "23",
+      "46",
+      "24",
+      "34",
+      "50",
+      "68",
+      "31",
+      "37",
+      "43",
+      "26",
+      "30",
+      "60",
+      "58",
+      "29",
+      "40",
+      "49",
+      "56",
+      "33",
+      "39",
+      "38",
+      "66",
+      "32",
+      "42",
+      "54",
+      "28",
+      "45",
+      "52",
+      "41",
+      "25",
+      "One Size"
+    ],
+    "constraints": {
+      "value_count": 40,
+      "max_length": 8
+    }
+  },
+  "country_of_origin": {
+    "display_name": "Land/Region der Herkunft",
+    "data_type": "string",
+    "valid_values": [
+      "Cook-Inseln",
+      "Nordmazedonien",
+      "Russland",
+      "Mayotte",
+      "Montserrat",
+      "Guinea-Bissau",
+      "Komoren",
+      "Ruanda",
+      "Tansania",
+      "Tristan da Cunha",
+      "Spanien",
+      "St. Barth\u00e9lemy",
+      "Turks-und Caicosinseln",
+      "Niederl\u00e4ndische Antillen",
+      "Puerto Rico",
+      "Pakistan",
+      "Republik Kongo",
+      "Burkina Faso",
+      "Mikronesien",
+      "Saint-Martin",
+      "Christmas Island",
+      "Gr\u00f6nland",
+      "Senegal",
+      "Bosnien und Herzegowina",
+      "Antarktika",
+      "Rum\u00e4nien",
+      "XY",
+      "Philippinen",
+      "Belize",
+      "Madagaskar",
+      "Aruba",
+      "Japan",
+      "Estland",
+      "Dominica",
+      "Kasachstan",
+      "Panama",
+      "Burma (Myanmar)",
+      "Uruguay",
+      "Simbabwe",
+      "Belgien",
+      "Botswana",
+      "Monaco",
+      "Brasilien",
+      "Moldawien",
+      "Deutschland",
+      "Ghana",
+      "Montenegro",
+      "Paraguay",
+      "St. Martin (franz\u00f6sischer Teil)",
+      "Tschad",
+      "Vanuatu",
+      "Marshall-Inseln",
+      "Irland",
+      "Svalbard",
+      "Eritrea",
+      "Burundi",
+      "\u00c4thiopien",
+      "Albanien",
+      "Malawi",
+      "Indien",
+      "Syrien",
+      "Niue",
+      "Kanarische Inseln",
+      "Lettland",
+      "Demokratische Republik Kongo",
+      "F\u00e4r\u00f6er-Inseln",
+      "XN",
+      "Ukraine",
+      "Kolumbien",
+      "St. Pierre und Miquelon",
+      "Antigua und Barbuda",
+      "Guinea",
+      "Neukaledonien",
+      "Sambia",
+      "Australien",
+      "Kambodscha",
+      "Luxemburg",
+      "US-Ozeanien",
+      "Kap Verde",
+      "Kuwait",
+      "Ascension",
+      "Litauen",
+      "Uganda",
+      "Heiliger Stuhl (Vatikanstadt)",
+      "Turkmenistan",
+      "El Salvador",
+      "Guam",
+      "Martinique",
+      "Kirgisistan",
+      "Norwegen",
+      "XC",
+      "Barbados",
+      "Tonga",
+      "Libanon",
+      "Wallis und Futuna",
+      "\u00d6sterreich",
+      "Katar",
+      "XM",
+      "Aserbaidschan",
+      "Kamerun",
+      "Andorra",
+      "Namibia",
+      "Falkland-Inseln",
+      "\u00c4gypten",
+      "Samoa",
+      "Tunesien",
+      "Gro\u00dfbritannien",
+      "WD",
+      "Trinidad und Tobago",
+      "Dschibuti",
+      "Saint Lucia",
+      "Gabun",
+      "Island",
+      "Argentinien",
+      "Laos",
+      "Franz\u00f6sisch-Guayana",
+      "Italien",
+      "Bhutan",
+      "Mauritius",
+      "US Virgin Islands",
+      "Iran",
+      "Jemen",
+      "S\u00e3o Tom\u00e9 und Pr\u00edncipe",
+      "Afghanistan",
+      "Timor-Leste",
+      "Nigeria",
+      "Malaysia",
+      "Schweden",
+      "Gambia",
+      "Brunei",
+      "Chile",
+      "China",
+      "British Indian Ocean Territory",
+      "Costa Rica",
+      "Nicaragua",
+      "Singapur",
+      "Mali",
+      "Taiwan",
+      "Norfolk Island",
+      "Mauretanien",
+      "Libyen",
+      "Nepal",
+      "Neuseeland",
+      "Seychellen",
+      "Swasiland",
+      "Ecuador",
+      "Honduras",
+      "Slowenien",
+      "Westsahara",
+      "Papua-Neuguinea",
+      "Bahrein",
+      "Israel",
+      "Macau",
+      "Amerikanisch-Samoa",
+      "Liberia",
+      "Bolivien",
+      "Kiribati",
+      "Mexiko",
+      "S. Georgia und S. Sandwich ISLs.",
+      "S\u00fcdafrika",
+      "D\u00e4nemark",
+      "WZ",
+      "Elfenbeink\u00fcste",
+      "Marokko",
+      "Pal\u00e4stinensische Autonomiegebiete",
+      "S\u00fcdsudan",
+      "Niger",
+      "Finnland",
+      "Pitcairn-Inseln",
+      "Irak",
+      "Osttimor",
+      "Malta",
+      "Vereinigte Staaten",
+      "Mongolei",
+      "Bangladesch",
+      "Salomon-Inseln",
+      "Sierra Leone",
+      "Tuvalu",
+      "Bonaire, St. Eustatius und Saba",
+      "British Virgin Islands",
+      "Guyana",
+      "XK",
+      "Guernsey",
+      "Heard und McDonald Inseln",
+      "Vietnam",
+      "\u00c4quatorial-Guinea",
+      "Zypern",
+      "Dominikanische Republik",
+      "Northern Mariana Islands",
+      "Tschechische Republik",
+      "Wei\u00dfrussland",
+      "Usbekistan",
+      "Algerien",
+      "Grenada",
+      "T\u00fcrkei",
+      "XB",
+      "Hongkong",
+      "Haiti",
+      "Malediven",
+      "Jugoslawien",
+      "Mosambik",
+      "S\u00fcdkorea",
+      "Aland-Inseln",
+      "Jersey",
+      "Saint Vincent und die Grenadinen",
+      "Bermuda",
+      "Kanada",
+      "San Marino",
+      "Lesotho",
+      "Fidschi",
+      "Ungarn",
+      "Bouvet-Insel",
+      "Nauru",
+      "Serbien",
+      "Unbekannt",
+      "Tokelau",
+      "Togo",
+      "Vereinigtes K\u00f6nigreich",
+      "Franz\u00f6sisch-Polynesien",
+      "Kuba",
+      "Cocos (Keeling) Inseln",
+      "Schweiz",
+      "Sri Lanka",
+      "Serbien und Montenegro",
+      "Niederlande",
+      "Anguilla",
+      "XE",
+      "Slowakei",
+      "Cayman Islands",
+      "Zaire",
+      "Bulgarien",
+      "Portugal",
+      "Saudi-Arabien",
+      "Angola",
+      "Guadeloupe",
+      "Nordkorea",
+      "Georgien",
+      "Polen",
+      "Bahamas",
+      "Isle of Man",
+      "Liechtenstein",
+      "Peru",
+      "Saint Helena",
+      "Suriname",
+      "Jamaika",
+      "Vereinigte Arabische Emirate",
+      "Frankreich",
+      "Kroatien",
+      "Venezuela",
+      "Thailand",
+      "Oman",
+      "Cura\u00e7ao",
+      "R\u00e9union",
+      "Gibraltar",
+      "Armenien",
+      "Franz\u00f6sisch S\u00fcdliche Territorien",
+      "Palau",
+      "Indonesien",
+      "Griechenland",
+      "Somalia",
+      "St. Kitts und Nevis",
+      "Zentralafrikanische Republik",
+      "Sudan",
+      "Kenia",
+      "Guatemala",
+      "Benin",
+      "Jordanien",
+      "Tadschikistan"
+    ],
+    "constraints": {
+      "value_count": 268,
+      "max_length": 33
+    }
+  },
+  "fabric_type": {
+    "display_name": "Gewebetyp",
+    "data_type": "string",
+    "valid_values": [],
+    "constraints": {
+      "value_count": 0,
+      "max_length": null
+    }
+  },
+  "list_price_with_tax": {
+    "display_name": "Preis mit Steuern zur Anzeige",
+    "data_type": "string",
+    "valid_values": [],
+    "constraints": {
+      "value_count": 0,
+      "max_length": null
+    }
+  }
+}
+
+CATEGORIZATION RULES:
+- Parent-level: brand, material, category, gender, age group, country of origin, product type, department
+- Variant-level: size, color, SKU, price, individual identifiers, specific measurements
+
+Return ONLY valid JSON in this exact format (no comments, no extra text):
+{
+  "parent_fields": ["field1", "field2"],
+  "variant_fields": ["field3", "field4"],
+  "confidence": 0.95,
+  "reasoning": "Brief explanation of categorization logic"
+}
+
+Analyze and categorize now:

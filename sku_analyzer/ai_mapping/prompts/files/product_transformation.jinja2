@@ -1,0 +1,289 @@
+**CRITICAL: EXACT FORMAT ENFORCEMENT**
+
+**REFERENCE FORMAT:** The file `example_output_ai.json` contains the EXACT JSON structure you MUST produce. Any deviation from this format will cause processing failures.
+
+**TRANSFORMATION TASK**
+
+**Parent SKU:** {{ parent_sku }}
+**Business Context:** {{ business_context or "German Amazon marketplace product transformation" }}
+
+**TRANSFORMATION OBJECTIVE:**
+Transform German product data into Amazon marketplace format following the EXACT structure shown in `example_output_ai.json`.
+
+**CRITICAL: MANDATORY FIELDS WITH STRICT VALID VALUES CONSTRAINTS**
+
+**PARENT-LEVEL FIELDS (SHARED ACROSS ALL VARIANTS):**
+
+{% for field_name, field_info in mandatory_fields.items() %}
+{% if field_name in ['feed_product_type', 'brand_name', 'outer_material_type', 'target_gender', 'age_range_description', 'bottoms_size_system', 'bottoms_size_class', 'country_of_origin', 'department_name', 'recommended_browse_nodes', 'standard_price', 'quantity', 'main_image_url', 'fabric_type', 'list_price_with_tax'] %}
+**{{ field_name }}** ({{ field_info.display_name }})
+  - Data Type: {{ field_info.data_type }}
+{% if field_info.valid_values %}
+  - **STRICT CONSTRAINT: ONLY USE THESE VALUES:**
+{% for valid_value in field_info.valid_values %}
+    * "{{ valid_value }}"
+{% endfor %}
+  - **NEVER use values not in this list**
+{% else %}
+  - Valid Values: Free text (extract from source data)
+{% endif %}
+  - Max Length: {{ field_info.constraints.max_length if field_info.constraints.max_length else "unlimited" }}
+
+{% endif %}
+{% endfor %}
+
+**VARIANT-LEVEL FIELDS (UNIQUE PER SKU):**
+
+{% for field_name, field_info in mandatory_fields.items() %}
+{% if field_name in ['item_sku', 'external_product_id', 'external_product_id_type', 'item_name', 'color_map', 'color_name', 'size_name', 'size_map'] %}
+**{{ field_name }}** ({{ field_info.display_name }})
+  - Data Type: {{ field_info.data_type }}
+{% if field_info.valid_values %}
+  - **STRICT CONSTRAINT: ONLY USE THESE VALUES:**
+{% for valid_value in field_info.valid_values %}
+    * "{{ valid_value }}"
+{% endfor %}
+  - **NEVER use values not in this list**
+{% else %}
+  - Valid Values: Free text (extract from source data)
+{% endif %}
+  - Max Length: {{ field_info.constraints.max_length if field_info.constraints.max_length else "unlimited" }}
+
+{% endif %}
+{% endfor %}
+
+**CRITICAL: SOURCE DATA MAPPING INSTRUCTIONS**
+
+**FROM COMPRESSED JSON TO MANDATORY FIELDS:**
+- parent_data.MANUFACTURER_NAME → brand_name (MUST be from valid_values list above)
+- parent_data.MANUFACTURER_TYPE_DESCRIPTION → feed_product_type (MUST be "pants" - only valid value)
+- parent_data.COUNTRY_OF_ORIGIN → country_of_origin (MUST be from valid_values list above)
+- parent_data.FVALUE_3_5 or similar material field → outer_material_type (MUST be from valid_values list above)
+- data_rows[].FVALUE_3_2 → size_name (extract from each variant)
+- data_rows[].FVALUE_3_3 → color_name (extract from each variant)  
+- data_rows[].SUPPLIER_PID → item_sku (extract from each variant)
+- data_rows[].INTERNATIONAL_PID → external_product_id (extract from each variant)
+- data_rows[].DESCRIPTION_SHORT → item_name (extract from each variant)
+- data_rows[].MIME_THUMB_1 → main_image_url (extract from first variant or parent)
+
+**GENDER/DEPARTMENT MAPPING RULES:**
+- If product type contains "Latzhose" or similar workwear → target_gender: "Männlich", department_name: "Herren"
+- If product indicates children's sizes (e.g., size 23-31) → age_range_description: "Kind", department_name: appropriate child category
+- Use valid_values lists above for exact mapping
+
+**COLOR MAPPING RULES:**
+- "Schwarz" → color_map: "Schwarz" (from valid_values)
+- "Braun" → color_map: "Braun" (from valid_values)  
+- "Oliv" → color_map: "Grün" (closest valid value)
+- Always use exact values from valid_values lists above
+
+**SIZE SYSTEM MAPPING:**
+- German numerical sizes (23-110) → bottoms_size_system: "DE / NL / SE / PL", bottoms_size_class: "Numerisch"
+- Map size_name to exact size_map value from valid_values list above
+
+**SOURCE PRODUCT DATA:**
+```json
+{{ product_data | tojson(indent=2) }}
+```
+
+{% if variance_analysis %}
+**VARIANCE ANALYSIS GUIDANCE:**
+{% if variance_analysis.variance_fields.size_fields %}
+- **Size Fields**: {{ variance_analysis.variance_fields.size_fields | join(", ") }} (varies across variants)
+{% endif %}
+{% if variance_analysis.variance_fields.color_fields %}
+- **Color Fields**: {{ variance_analysis.variance_fields.color_fields | join(", ") }} (varies across variants)
+{% endif %}
+{% if variance_analysis.field_mappings %}
+- **Suggested Mappings**: 
+{% for source_field, target_field in variance_analysis.field_mappings.items() %}
+  - {{ source_field }} → {{ target_field }}
+{% endfor %}
+{% endif %}
+{% endif %}
+
+**EXACT OUTPUT FORMAT REQUIREMENTS:**
+
+**REFERENCE STRUCTURE (from example_output_ai.json):**
+```json
+{
+  "metadata": {
+    "parent_id": "4307",
+    "job_id": "job_20240117_163000",
+    "transformation_timestamp": "2024-01-17T16:45:00Z",
+    "ai_model": "gemini-2.5-flash",
+    "mapping_confidence": 0.91,
+    "total_variants": 81
+  },
+  "parent_data": {
+    "feed_product_type": "pants",
+    "brand_name": "EIKO",
+    "outer_material_type": "Cord",
+    "target_gender": "Männlich", 
+    "age_range_description": "Erwachsener",
+    "bottoms_size_system": "DE / NL / SE / PL",
+    "bottoms_size_class": "Numerisch",
+    "country_of_origin": "Tunesien",
+    "department_name": "Herren",
+    "recommended_browse_nodes": "1981663031",
+    "standard_price": "extracted_price",
+    "quantity": "extracted_quantity", 
+    "main_image_url": "extracted_image_url",
+    "fabric_type": "extracted_fabric",
+    "list_price_with_tax": "extracted_list_price"
+  },
+  "variance_data": [
+    {
+      "item_sku": "4307_40_44",
+      "external_product_id": "4033976004549",
+      "external_product_id_type": "EAN",
+      "item_name": "LAHN - Latzhose - Genuacord - Schwarz - Größe: 44",
+      "color_map": "Schwarz",
+      "color_name": "Schwarz",
+      "size_name": "44",
+      "size_map": "44"
+    }
+  ]
+}
+```
+
+**TRANSFORMATION RULES:**
+
+**1. METADATA SECTION (EXACT STRUCTURE REQUIRED):**
+- `parent_id`: Extract from source parent SKU (string)
+- `job_id`: Generate format "job_YYYYMMDD_HHMMSS" (string)
+- `transformation_timestamp`: Current timestamp in ISO 8601 format (string)
+- `ai_model`: Set to "gemini-2.5-flash" (string)
+- `mapping_confidence`: Your confidence score 0.0-1.0 (number)
+- `total_variants`: Count of individual SKU records in variance_data (number)
+
+**2. PARENT_DATA SECTION (ALL 15 MANDATORY PARENT FIELDS REQUIRED):**
+**CRITICAL:** This MUST contain ALL 15 parent-level mandatory fields with ACTUAL values from source data.
+
+**REQUIRED PARENT FIELDS (ALL MUST BE PRESENT):**
+- feed_product_type (MUST be "pants" - only valid value)
+- brand_name (MUST be from valid_values list - exact match required)
+- outer_material_type (MUST be from valid_values list - exact match required)
+- target_gender (MUST be from valid_values list - exact match required)
+- age_range_description (MUST be from valid_values list - exact match required) 
+- bottoms_size_system (MUST be "DE / NL / SE / PL" - only valid value)
+- bottoms_size_class (MUST be from valid_values list - exact match required)
+- country_of_origin (MUST be from valid_values list - exact match required)
+- department_name (MUST be from valid_values list - exact match required)
+- recommended_browse_nodes (MUST be "1981663031" - only valid value)
+- standard_price (extract from source data)
+- quantity (extract from source data)
+- main_image_url (extract from source data)
+- fabric_type (extract from source data)  
+- list_price_with_tax (extract from source data)
+
+**3. VARIANCE_DATA SECTION (ALL 8 MANDATORY VARIANT FIELDS REQUIRED):**
+**CRITICAL:** Each SKU object MUST contain ALL 8 variant-level mandatory fields.
+
+**REQUIRED VARIANT FIELDS (ALL MUST BE PRESENT FOR EACH SKU):**
+- item_sku (extract from SUPPLIER_PID)
+- external_product_id (extract from INTERNATIONAL_PID)
+- external_product_id_type (MUST be from valid_values list - typically "EAN")
+- item_name (extract from DESCRIPTION_SHORT)
+- color_map (MUST be from valid_values list - exact match required)
+- color_name (extract from FVALUE_3_3 or similar)
+- size_name (extract from FVALUE_3_2 or similar) 
+- size_map (MUST be from valid_values list - exact match required)
+
+**CRITICAL CONSTRAINT VALIDATION:**
+
+**BEFORE OUTPUTTING, VERIFY EACH FIELD:**
+
+✅ **feed_product_type**: ONLY "pants" allowed - NEVER use any other value
+✅ **brand_name**: MUST match exactly one of: {{ mandatory_fields.brand_name.valid_values | join('", "') if mandatory_fields.brand_name.valid_values else "extract from source" }}
+✅ **outer_material_type**: MUST match exactly one of the 33 valid values from list above
+✅ **target_gender**: MUST match exactly one of: {{ mandatory_fields.target_gender.valid_values | join('", "') if mandatory_fields.target_gender.valid_values }}
+✅ **age_range_description**: MUST match exactly one of: {{ mandatory_fields.age_range_description.valid_values | join('", "') if mandatory_fields.age_range_description.valid_values }}
+✅ **bottoms_size_system**: ONLY "DE / NL / SE / PL" allowed
+✅ **bottoms_size_class**: MUST match exactly one of the 5 valid values from list above  
+✅ **country_of_origin**: MUST match exactly one of the 268 valid values from list above
+✅ **department_name**: MUST match exactly one of the 9 valid values from list above
+✅ **recommended_browse_nodes**: ONLY "1981663031" allowed
+✅ **external_product_id_type**: MUST match exactly one of: {{ mandatory_fields.external_product_id_type.valid_values | join('", "') if mandatory_fields.external_product_id_type.valid_values }}
+✅ **color_map**: MUST match exactly one of the 22 valid values from list above
+✅ **size_map**: MUST match exactly one of the 40 valid values from list above
+
+**TRANSFORMATION EXAMPLES FROM SOURCE TO OUTPUT:**
+
+**Example Source Data:**
+```json
+{
+  "parent_data": {
+    "MANUFACTURER_NAME": "EIKO",
+    "MANUFACTURER_TYPE_DESCRIPTION": "LAHN", 
+    "COUNTRY_OF_ORIGIN": "Tunesien",
+    "FVALUE_3_5": "Genuacord"
+  },
+  "data_rows": [
+    {
+      "SUPPLIER_PID": "4307_40_44",
+      "INTERNATIONAL_PID": 4033976004549,
+      "DESCRIPTION_SHORT": "LAHN - Latzhose - Genuacord - Schwarz - Größe: 44",
+      "FVALUE_3_2": 44,
+      "FVALUE_3_3": "Schwarz"
+    }
+  ]
+}
+```
+
+**Required Output:**
+```json
+{
+  "metadata": {
+    "parent_id": "4307",
+    "job_id": "job_20240117_163000", 
+    "transformation_timestamp": "2024-01-17T16:45:00Z",
+    "ai_model": "gemini-2.5-flash",
+    "mapping_confidence": 0.91,
+    "total_variants": 1
+  },
+  "parent_data": {
+    "feed_product_type": "pants",
+    "brand_name": "EIKO", 
+    "outer_material_type": "Cord",
+    "target_gender": "Männlich",
+    "age_range_description": "Erwachsener",
+    "bottoms_size_system": "DE / NL / SE / PL",
+    "bottoms_size_class": "Numerisch", 
+    "country_of_origin": "Tunesien",
+    "department_name": "Herren",
+    "recommended_browse_nodes": "1981663031",
+    "standard_price": "extracted_or_default",
+    "quantity": "extracted_or_default",
+    "main_image_url": "extracted_or_default",
+    "fabric_type": "extracted_or_default",
+    "list_price_with_tax": "extracted_or_default"
+  },
+  "variance_data": [
+    {
+      "item_sku": "4307_40_44",
+      "external_product_id": "4033976004549",
+      "external_product_id_type": "EAN",
+      "item_name": "LAHN - Latzhose - Genuacord - Schwarz - Größe: 44",
+      "color_map": "Schwarz", 
+      "color_name": "Schwarz",
+      "size_name": "44",
+      "size_map": "44"
+    }
+  ]
+}
+```
+
+**CRITICAL FINAL INSTRUCTIONS:**
+
+1. **EXACT FORMAT ONLY**: Output must match `example_output_ai.json` structure exactly
+2. **ALL 23 MANDATORY FIELDS**: Include all parent and variant fields - no exceptions
+3. **STRICT VALID_VALUES ENFORCEMENT**: NEVER use values not in the valid_values lists above
+4. **NO PLACEHOLDERS**: Use actual transformed data values from source
+5. **INDIVIDUAL SKU RECORDS**: variance_data must be array of complete SKU objects
+6. **COMPLETE FIELD COVERAGE**: Every parent_data and variance_data object must have all required fields
+7. **CONSTRAINT VALIDATION**: Check every field value against its valid_values list before output
+
+**NEVER use values not in valid_values lists - this will cause processing failures.**
+
+**Output the transformed JSON now following the EXACT format and constraints above:**

@@ -1,0 +1,116 @@
+**OUTPUT FORMAT VALIDATION**
+
+**REFERENCE FORMAT:** Validate against `example_output_ai.json` structure
+
+**AI GENERATED OUTPUT:**
+```json
+{{ ai_output | tojson(indent=2) }}
+```
+
+**VALIDATION CHECKLIST:**
+
+**✅ STRUCTURE VALIDATION:**
+1. **Top-level keys**: Must contain exactly 3 keys: "metadata", "parent_data", "variance_data"
+2. **JSON validity**: Must be valid, parseable JSON
+3. **Data types**: All fields must have correct data types
+
+**✅ METADATA SECTION:**
+Required fields with correct types:
+- [ ] `parent_id` (string): Present and non-empty
+- [ ] `job_id` (string): Format "job_YYYYMMDD_HHMMSS"  
+- [ ] `transformation_timestamp` (string): ISO 8601 format
+- [ ] `ai_model` (string): Set to "gemini-2.5-flash"
+- [ ] `mapping_confidence` (number): Between 0.0 and 1.0
+- [ ] `total_variants` (number): Matches variance_data array length
+
+**✅ PARENT_DATA SECTION:**
+- [ ] Is an object (not array or string)
+- [ ] NOT empty object {}
+- [ ] Contains actual transformed values (not placeholders)
+- [ ] Field names are valid Amazon marketplace fields
+- [ ] Values are properly mapped from source data
+
+**Common required fields:**
+- [ ] `brand_name` (string)
+- [ ] `feed_product_type` (string)  
+- [ ] `country_of_origin` (string)
+- [ ] Additional fields as appropriate
+
+**✅ VARIANCE_DATA SECTION:**
+- [ ] Is an ARRAY (not object)
+- [ ] Contains individual SKU objects (not arrays of unique values)
+- [ ] Each object has exactly 5 fields: item_sku, size_name, color_name, size_map, color_map
+- [ ] All `item_sku` values are unique
+- [ ] All field values are strings (not arrays)
+- [ ] Represents actual variant combinations
+
+**VALIDATION ERRORS TO CHECK:**
+
+**❌ CRITICAL ERRORS (MUST FIX):**
+1. **Empty parent_data**: `"parent_data": {}`
+2. **Wrong variance_data format**: `"variance_data": {"size_name": ["44", "46"]}`
+3. **Missing required fields**: Missing metadata fields
+4. **Invalid data types**: Numbers as strings, etc.
+5. **Placeholder values**: "TRANSFORMED_BRAND_VALUE", "MAPPED_PRODUCT_TYPE"
+
+**❌ COMMON MISTAKES:**
+- variance_data as object instead of array
+- Arrays of values instead of individual SKU records  
+- Empty or placeholder parent_data values
+- Missing or malformed metadata fields
+- Incorrect field names or data types
+
+**VALIDATION RESULT:**
+{% if validation_errors %}
+**ERRORS FOUND:**
+{% for error in validation_errors %}
+- {{ error }}
+{% endfor %}
+
+**STATUS: FAILED** ❌
+Output does not match required format. Please fix errors above.
+{% else %}
+**STATUS: PASSED** ✅ 
+Output matches required format from example_output_ai.json.
+{% endif %}
+
+**FORMAT COMPARISON:**
+
+**Expected Structure (from example_output_ai.json):**
+```json
+{
+  "metadata": {
+    "parent_id": "string",
+    "job_id": "string", 
+    "transformation_timestamp": "string",
+    "ai_model": "string",
+    "mapping_confidence": number,
+    "total_variants": number
+  },
+  "parent_data": {
+    "field_name": "actual_value",
+    "field_name": "actual_value"
+  },
+  "variance_data": [
+    {
+      "item_sku": "unique_sku_1",
+      "size_name": "size_value",
+      "color_name": "color_value", 
+      "size_map": "mapped_size",
+      "color_map": "mapped_color"
+    }
+  ]
+}
+```
+
+**REMEDIATION GUIDANCE:**
+
+If validation fails, the AI must:
+1. Review the `example_output_ai.json` file structure
+2. Fix structural issues (arrays vs objects)
+3. Populate parent_data with actual shared values
+4. Convert variance_data to individual SKU records
+5. Ensure all metadata fields are present and correct
+6. Re-validate against this checklist
+
+**Re-generate output following the EXACT format shown in example_output_ai.json.**

@@ -1,0 +1,61 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sku-analyzer"
+version = "1.0.0"
+description = "Modern SKU parent-child pattern analyzer with hierarchical delimiter-based approach"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "SKU Analyzer", email = "sku@analyzer.com"}
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+]
+requires-python = ">=3.12"
+dependencies = [
+    "pandas>=2.2.0",
+    "openpyxl>=3.1.0",
+    "orjson>=3.11.3",
+    "pydantic>=2.11.7",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+    "mypy>=1.0.0",
+]
+performance = [
+    "orjson>=3.9.0",
+    "ujson>=5.8.0",
+]
+
+[project.scripts]
+sku-analyzer = "main:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["sku_analyzer*"]
+
+[tool.black]
+line-length = 100
+target-version = ['py312']
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+select = ["E", "F", "W", "I", "N", "UP"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_return_any = true
+warn_unused_configs = true

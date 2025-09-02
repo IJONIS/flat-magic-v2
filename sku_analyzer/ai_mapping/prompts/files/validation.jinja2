@@ -1,0 +1,38 @@
+**VALIDATION TASK**
+
+**Original Mapping Result:**
+```json
+{{ mapping_result | tojson(indent=2) }}
+```
+
+**VALIDATION CRITERIA:**
+1. **Accuracy Check:** Are mapped values logically correct for target fields?
+2. **Constraint Compliance:** Do mapped values respect field constraints?
+3. **Type Safety:** Are data types properly preserved/converted?
+4. **Completeness:** Are critical mandatory fields appropriately handled?
+5. **Confidence Validation:** Are confidence scores realistic and justified?
+
+**VALIDATION QUESTIONS:**
+- Does each mapping make logical sense given the source data?
+- Are confidence scores aligned with mapping quality?
+- Are unmapped fields truly unmappable from available data?
+- Do mapped values respect target field constraints?
+
+**REQUIRED OUTPUT FORMAT:**
+```json
+{
+  "validation_passed": true|false,
+  "confidence_adjustment": 0.05,
+  "issues_found": [
+    {
+      "field": "field_name",
+      "issue": "description of problem",
+      "severity": "low|medium|high",
+      "suggestion": "how to fix"
+    }
+  ],
+  "validation_summary": "Overall assessment and recommendations"
+}
+```
+
+Validate the mapping result:

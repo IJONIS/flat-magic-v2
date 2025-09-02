@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "parent_id": "4307",
+    "job_id": "job_20240117_163000",
+    "transformation_timestamp": "2024-01-17T16:45:00Z",
+    "ai_model": "gemini-2.5-flash",
+    "mapping_confidence": 0.91,
+    "total_variants": 4
+  },
+  "parent_data": {
+    "feed_product_type": "pants",
+    "brand_name": "EIKO",
+    "outer_material_type": "Cord",
+    "target_gender": "Männlich", 
+    "age_range_description": "Erwachsener",
+    "bottoms_size_system": "DE / NL / SE / PL",
+    "bottoms_size_class": "Numerisch",
+    "country_of_origin": "Tunesien",
+    "department_name": "Herren",
+    "recommended_browse_nodes": "1981663031"
+  },
+  "variance_data": [
+    {
+      "item_sku": "4307_40_44",
+      "size_name": "44",
+      "color_name": "Schwarz",
+      "size_map": "44",
+      "color_map": "Schwarz"
+    },
+    {
+      "item_sku": "4307_40_46", 
+      "size_name": "46",
+      "color_name": "Schwarz",
+      "size_map": "46",
+      "color_map": "Schwarz"
+    },
+    {
+      "item_sku": "4307_60_44",
+      "size_name": "44", 
+      "color_name": "Braun",
+      "size_map": "44",
+      "color_map": "Braun"
+    },
+    {
+      "item_sku": "4307_71_44",
+      "size_name": "44",
+      "color_name": "Oliv", 
+      "size_map": "44",
+      "color_map": "Grün"
+    }
+  ]
+}
