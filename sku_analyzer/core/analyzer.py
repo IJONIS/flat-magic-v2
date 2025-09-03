@@ -363,7 +363,7 @@ class SkuPatternAnalyzer:
             self.logger.info("🏗️ Generating template structure (Step 4)")
             
             # Import template generator
-            from ..flat_file.template_generator import TemplateGenerator
+            from ..step4_template.generator import TemplateGenerator
             
             # Initialize template generator
             template_generator = TemplateGenerator(enable_performance_monitoring=True)
@@ -427,12 +427,12 @@ class SkuPatternAnalyzer:
         
         try:
             # Import AI mapping processor
-            from ..ai_mapping.processor import AIMappingProcessor
-            from ..ai_mapping.models import AIProcessingConfig
+            from ..step5_mapping.processor import MappingProcessor
+            from ..shared.gemini_client import AIProcessingConfig
             
             # Initialize AI processor
             ai_config = AIProcessingConfig()
-            ai_processor = AIMappingProcessor(ai_config)
+            ai_processor = MappingProcessor(ai_config)
             
             # Process AI mapping for all parents
             ai_results = await ai_processor.process_all_parents(
@@ -440,7 +440,7 @@ class SkuPatternAnalyzer:
             )
             
             # Log AI mapping results
-            summary = ai_results.get('summary', {})
+            summary = ai_results.summary
             successful = summary.get('successful', 0)
             total = summary.get('total_parents', 0)
             avg_confidence = summary.get('average_confidence', 0.0)

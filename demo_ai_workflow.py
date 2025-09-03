@@ -2,7 +2,7 @@
 
 import asyncio
 from pathlib import Path
-from sku_analyzer.ai_mapping.integration_point import AIMapingIntegration
+from sku_analyzer.workflow_integration import AIWorkflowIntegration
 
 
 async def demo_ai_workflow():
@@ -28,11 +28,11 @@ async def demo_ai_workflow():
     print(f"📁 Using output directory: {latest_output.name}")
     
     # Initialize AI integration
-    ai_integration = AIMapingIntegration(enable_ai=True)
+    ai_integration = AIWorkflowIntegration(enable_ai=True)
     
     # Process with AI mapping
     print("🤖 Running AI mapping step...")
-    result = ai_integration.process_ai_mapping_step(
+    result = await ai_integration.process_ai_mapping_step(
         output_dir=latest_output,
         starting_parent="4301"
     )

@@ -13,8 +13,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-from ..ai_mapping.gemini_client import ModernGeminiClient
-from ..ai_mapping.models import AIProcessingConfig
+from ..shared.gemini_client import GeminiClient as ModernGeminiClient
+from ..step5_mapping.models import AIProcessingConfig
 from .performance_monitor import PerformanceMonitor
 from .validation_utils import ValidationUtils
 
