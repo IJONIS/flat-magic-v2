@@ -79,9 +79,28 @@ class PromptOptimizer:
     
     @staticmethod
     def compress_product_data(product_data: Dict[str, Any], max_fields: int = 10, ultra_safe_mode: bool = False) -> Dict[str, Any]:
-        """Compress product data to essential fields only."""
+        """Compress product data to essential fields only with type safety."""
+        if not isinstance(product_data, dict):
+            logging.getLogger(__name__).warning(
+                f"Expected dict for product_data, got {type(product_data).__name__}: {product_data}"
+            )
+            return {'parent_data': {}, 'data_rows': []}
+        
         parent_data = product_data.get('parent_data', {})
         data_rows = product_data.get('data_rows', [])
+        
+        # Type safety checks
+        if not isinstance(parent_data, dict):
+            logging.getLogger(__name__).warning(
+                f"Expected dict for parent_data, got {type(parent_data).__name__}: {parent_data}"
+            )
+            parent_data = {}
+        
+        if not isinstance(data_rows, list):
+            logging.getLogger(__name__).warning(
+                f"Expected list for data_rows, got {type(data_rows).__name__}: {data_rows}"
+            )
+            data_rows = []
         
         # Essential fields that are safe and commonly mapped
         if ultra_safe_mode:
@@ -106,9 +125,15 @@ class PromptOptimizer:
                     continue
                 compressed_parent[field] = value
         
-        # Compress variants to essential fields only
+        # Compress variants to essential fields only with type safety
         compressed_variants = []
         for i, variant in enumerate(data_rows[:max_fields]):  # Limit variant count
+            if not isinstance(variant, dict):
+                logging.getLogger(__name__).warning(
+                    f"Expected dict for variant {i}, got {type(variant).__name__}: {variant}"
+                )
+                continue
+            
             compressed_variant = {}
             for field in safe_essential_fields:
                 if field in variant:
@@ -126,33 +151,63 @@ class PromptOptimizer:
     
     @staticmethod
     def extract_essential_template_fields(template_structure: Dict[str, Any], max_fields: int = 8) -> Dict[str, Any]:
-        """Extract only the most essential template fields."""
+        """Extract only the most essential template fields with type safety."""
+        if not isinstance(template_structure, dict):
+            logging.getLogger(__name__).warning(
+                f"Expected dict for template_structure, got {type(template_structure).__name__}: {template_structure}"
+            )
+            return {}
+        
         essential_fields = {}
         
-        # Parent fields - most critical ones
-        parent_fields = template_structure.get('parent_product', {}).get('fields', {})
+        # Parent fields - most critical ones with type safety
+        parent_product = template_structure.get('parent_product', {})
+        if not isinstance(parent_product, dict):
+            parent_product = {}
+        
+        parent_fields = parent_product.get('fields', {})
+        if not isinstance(parent_fields, dict):
+            parent_fields = {}
+        
         priority_parent_fields = ['brand_name', 'feed_product_type', 'item_name', 'manufacturer']
         
         for field in priority_parent_fields:
             if field in parent_fields:
                 field_info = parent_fields[field]
-                # Simplify field structure to reduce payload
-                essential_fields[field] = {
-                    'data_type': field_info.get('data_type', 'string'),
-                    'required': field_info.get('validation_rules', {}).get('required', True)
-                }
+                if isinstance(field_info, dict):
+                    validation_rules = field_info.get('validation_rules', {})
+                    if not isinstance(validation_rules, dict):
+                        validation_rules = {}
+                    
+                    # Simplify field structure to reduce payload
+                    essential_fields[field] = {
+                        'data_type': field_info.get('data_type', 'string'),
+                        'required': validation_rules.get('required', True)
+                    }
         
-        # Variant fields - most critical ones
-        child_fields = template_structure.get('child_variants', {}).get('fields', {})
+        # Variant fields - most critical ones with type safety
+        child_variants = template_structure.get('child_variants', {})
+        if not isinstance(child_variants, dict):
+            child_variants = {}
+        
+        child_fields = child_variants.get('fields', {})
+        if not isinstance(child_fields, dict):
+            child_fields = {}
+        
         priority_variant_fields = ['item_sku', 'color_name', 'size_name', 'external_product_id']
         
         for field in priority_variant_fields:
             if field in child_fields:
                 field_info = child_fields[field]
-                essential_fields[field] = {
-                    'data_type': field_info.get('data_type', 'string'),
-                    'required': field_info.get('validation_rules', {}).get('required', True)
-                }
+                if isinstance(field_info, dict):
+                    validation_rules = field_info.get('validation_rules', {})
+                    if not isinstance(validation_rules, dict):
+                        validation_rules = {}
+                    
+                    essential_fields[field] = {
+                        'data_type': field_info.get('data_type', 'string'),
+                        'required': validation_rules.get('required', True)
+                    }
         
         return essential_fields
 

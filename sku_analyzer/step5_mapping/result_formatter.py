@@ -81,32 +81,51 @@ class ResultFormatter:
         """
         extracted_fields = {}
         
-        # Extract parent fields
+        # Type safety check
+        if not isinstance(template_structure, dict):
+            self.logger.warning(
+                f"Expected dict for template_structure, got {type(template_structure).__name__}: {template_structure}"
+            )
+            return extracted_fields
+        
+        # Extract parent fields with type safety
         parent_product = template_structure.get('parent_product', {})
+        if not isinstance(parent_product, dict):
+            parent_product = {}
+        
         parent_fields = parent_product.get('fields', {})
+        if not isinstance(parent_fields, dict):
+            parent_fields = {}
         
         for field_name, field_info in parent_fields.items():
-            extracted_fields[field_name] = {
-                'display_name': field_info.get('display_name', field_name),
-                'data_type': field_info.get('data_type', 'string'),
-                'constraints': field_info.get('constraints', {}),
-                'level': 'parent',
-                'validation_rules': field_info.get('validation_rules', {})
-            }
+            if isinstance(field_info, dict):
+                extracted_fields[field_name] = {
+                    'display_name': field_info.get('display_name', field_name),
+                    'data_type': field_info.get('data_type', 'string'),
+                    'constraints': field_info.get('constraints', {}),
+                    'level': 'parent',
+                    'validation_rules': field_info.get('validation_rules', {})
+                }
         
-        # Extract variant fields
+        # Extract variant fields with type safety
         child_variants = template_structure.get('child_variants', {})
+        if not isinstance(child_variants, dict):
+            child_variants = {}
+        
         variant_fields = child_variants.get('fields', {})
+        if not isinstance(variant_fields, dict):
+            variant_fields = {}
         
         for field_name, field_info in variant_fields.items():
-            extracted_fields[field_name] = {
-                'display_name': field_info.get('display_name', field_name),
-                'data_type': field_info.get('data_type', 'string'),
-                'constraints': field_info.get('constraints', {}),
-                'level': 'variant',
-                'variation_type': field_info.get('variation_type', 'attribute'),
-                'validation_rules': field_info.get('validation_rules', {})
-            }
+            if isinstance(field_info, dict):
+                extracted_fields[field_name] = {
+                    'display_name': field_info.get('display_name', field_name),
+                    'data_type': field_info.get('data_type', 'string'),
+                    'constraints': field_info.get('constraints', {}),
+                    'level': 'variant',
+                    'variation_type': field_info.get('variation_type', 'attribute'),
+                    'validation_rules': field_info.get('validation_rules', {})
+                }
         
         return extracted_fields
     
@@ -127,7 +146,15 @@ class ResultFormatter:
         # Update confidence average
         current_avg = self.processing_stats["average_confidence"]
         total_processed = self.processing_stats["total_processed"]
-        confidence = transformation_result.metadata.get("confidence", 0.0)
+        # Type safety for metadata access
+        metadata = transformation_result.metadata
+        if not isinstance(metadata, dict):
+            self.logger.warning(
+                f"Expected dict for metadata, got {type(metadata).__name__}: {metadata}"
+            )
+            metadata = {}
+        
+        confidence = metadata.get("confidence", 0.0)
         
         self.processing_stats["average_confidence"] = (
             (current_avg * (total_processed - 1) + confidence) 

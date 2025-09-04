@@ -44,6 +44,13 @@ class FormatEnforcer:
         """
         warnings = []
         
+        # Type safety: ensure mapping_result is a dictionary
+        if not isinstance(mapping_result, dict):
+            error_msg = f"Invalid mapping_result type: {type(mapping_result).__name__}, expected dict"
+            self.logger.error(error_msg)
+            warnings.append(error_msg)
+            return self._create_minimal_compliant_result(parent_sku), warnings
+        
         try:
             # Create compliant structure
             compliant_result = {

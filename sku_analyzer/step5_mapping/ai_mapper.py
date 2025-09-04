@@ -63,12 +63,13 @@ class AIMapper:
                 result = await self._execute_optimized_ai_mapping(mapping_input)
                 
                 # Validate result quality
-                if result.metadata.get("confidence", 0.0) >= self.config.confidence_threshold:
+                confidence = result.metadata.get("confidence", 0.0) if isinstance(result.metadata, dict) else 0.0
+                if confidence >= self.config.confidence_threshold:
                     self.result_formatter.processing_stats["successful_mappings"] += 1
                     return result
                 else:
                     self.logger.warning(
-                        f"Low confidence result ({result.metadata.get('confidence', 0.0)}) "
+                        f"Low confidence result ({confidence}) "
                         f"for {mapping_input.parent_sku} (attempt {attempt + 1})"
                     )
                     
@@ -97,9 +98,11 @@ class AIMapper:
                         )
                         try:
                             result = await strategy_func(mapping_input)
-                            if result.metadata.get("confidence", 0.0) >= (self.config.confidence_threshold * 0.7):  # Lower threshold for fallbacks
-                                result.metadata["fallback_strategy"] = strategy_name
-                                result.metadata["original_safety_error"] = str(e)
+                            fallback_confidence = result.metadata.get("confidence", 0.0) if isinstance(result.metadata, dict) else 0.0
+                            if fallback_confidence >= (self.config.confidence_threshold * 0.7):  # Lower threshold for fallbacks
+                                if isinstance(result.metadata, dict):
+                                    result.metadata["fallback_strategy"] = strategy_name
+                                    result.metadata["original_safety_error"] = str(e)
                                 self.result_formatter.processing_stats["successful_mappings"] += 1
                                 return result
                         except Exception as fallback_error:
@@ -205,8 +208,9 @@ class AIMapper:
         result = self._parse_ai_response(json_data, mapping_input.parent_sku)
         
         # Mark as ultra-simplified approach
-        result.metadata["ultra_simplified"] = True
-        result.metadata["processing_notes"] = "Used ultra-simplified mapping for safety compliance"
+        if isinstance(result.metadata, dict):
+            result.metadata["ultra_simplified"] = True
+            result.metadata["processing_notes"] = "Used ultra-simplified mapping for safety compliance"
         
         return result
     
@@ -231,7 +235,8 @@ class AIMapper:
         
         json_data = await self.ai_client.validate_json_response(response)
         result = self._parse_ai_response(json_data, mapping_input.parent_sku)
-        result.metadata["field_only_mapping"] = True
+        if isinstance(result.metadata, dict):
+            result.metadata["field_only_mapping"] = True
         
         return result
     
@@ -253,7 +258,8 @@ class AIMapper:
         
         json_data = await self.ai_client.validate_json_response(response)
         result = self._parse_ai_response(json_data, mapping_input.parent_sku)
-        result.metadata["minimal_safe_mapping"] = True
+        if isinstance(result.metadata, dict):
+            result.metadata["minimal_safe_mapping"] = True
         
         return result
     
@@ -267,43 +273,48 @@ class AIMapper:
         Returns:
             Minimal transformation result with basic field mappings
         """
-        # Extract basic product data for minimal mapping
+        # Extract basic product data for minimal mapping with type safety
         product_data = mapping_input.product_data
-        parent_data = product_data.get('parent_data', {})
-        data_rows = product_data.get('data_rows', [])
+        parent_data = self._safe_get_dict(product_data, 'parent_data', {})
+        data_rows = self._safe_get_list(product_data, 'data_rows', [])
         
         # Create basic mappings based on common field patterns
         mapped_parent_data = {}
         
-        # Try to map brand/manufacturer
-        for field_name, field_value in parent_data.items():
-            if 'MANUFACTURER' in field_name and len(str(field_value)) < 50:
-                mapped_parent_data['brand_name'] = str(field_value)
-                break
+        # Try to map brand/manufacturer with type safety
+        if isinstance(parent_data, dict):
+            for field_name, field_value in parent_data.items():
+                if 'MANUFACTURER' in field_name and len(str(field_value)) < 50:
+                    mapped_parent_data['brand_name'] = str(field_value)
+                    break
         
         if 'brand_name' not in mapped_parent_data:
             mapped_parent_data['brand_name'] = 'Unknown Brand'
         
         # Try to map product type or category
-        if 'GROUP_STRING' in parent_data:
+        if isinstance(parent_data, dict) and 'GROUP_STRING' in parent_data:
             mapped_parent_data['feed_product_type'] = 'Product'
         
-        # Create basic variant mappings
+        # Create basic variant mappings with type safety
         mapped_variants = {}
-        for i, variant in enumerate(data_rows[:3]):  # Max 3 variants
-            variant_key = f"variant_{i+1}"
-            variant_data = {}
-            
-            # Map SKU/PID fields
-            for field_name, field_value in variant.items():
-                if 'PID' in field_name and len(str(field_value)) < 30:
-                    variant_data['item_sku'] = str(field_value)
-                    break
-            
-            if 'item_sku' not in variant_data:
-                variant_data['item_sku'] = f"{mapping_input.parent_sku}_var_{i+1}"
-            
-            mapped_variants[variant_key] = variant_data
+        if isinstance(data_rows, list):
+            for i, variant in enumerate(data_rows[:3]):  # Max 3 variants
+                if not isinstance(variant, dict):
+                    continue
+                
+                variant_key = f"variant_{i+1}"
+                variant_data = {}
+                
+                # Map SKU/PID fields
+                for field_name, field_value in variant.items():
+                    if 'PID' in field_name and len(str(field_value)) < 30:
+                        variant_data['item_sku'] = str(field_value)
+                        break
+                
+                if 'item_sku' not in variant_data:
+                    variant_data['item_sku'] = f"{mapping_input.parent_sku}_var_{i+1}"
+                
+                mapped_variants[variant_key] = variant_data
         
         return TransformationResult(
             parent_sku=mapping_input.parent_sku,
@@ -335,7 +346,7 @@ class AIMapper:
             max_fields=self.ai_client.config.max_variants_per_request
         )
         
-        # Extract essential template fields
+        # Extract essential template fields with type safety
         essential_fields = {}
         if mapping_input.template_structure:
             essential_fields = self.prompt_optimizer.extract_essential_template_fields(
@@ -343,9 +354,12 @@ class AIMapper:
             )
         else:
             # Use first 6 mandatory fields if no template
-            essential_fields = dict(list(mapping_input.mandatory_fields.items())[:6])
+            if isinstance(mapping_input.mandatory_fields, dict):
+                essential_fields = dict(list(mapping_input.mandatory_fields.items())[:6])
+            else:
+                essential_fields = {}
         
-        variant_count = len(compressed_data.get('data_rows', []))
+        variant_count = len(self._safe_get_list(compressed_data, 'data_rows', []))
         
         # Streamlined prompt template
         return f"""Product data mapping for German Amazon marketplace.
@@ -387,12 +401,12 @@ Map semantically. Output JSON:
         Returns:
             Ultra-minimal prompt string (target: <2KB)
         """
-        # Extract only the most basic data
+        # Extract only the most basic data with type safety
         product_data = mapping_input.product_data
-        parent_data = product_data.get('parent_data', {})
-        data_rows = product_data.get('data_rows', [])
+        parent_data = self._safe_get_dict(product_data, 'parent_data', {})
+        data_rows = self._safe_get_list(product_data, 'data_rows', [])
         
-        # Only extract absolutely safe fields
+        # Only extract absolutely safe fields with type safety
         safe_data = {}
         if ultra_safe_mode:
             # Ultra-conservative field selection
@@ -400,20 +414,22 @@ Map semantically. Output JSON:
         else:
             safe_fields = ['MANUFACTURER_NAME', 'MANUFACTURER_PID', 'FVALUE_3_1', 'FVALUE_3_2']
         
-        for field in safe_fields:
-            if field in parent_data:
-                value = str(parent_data[field])
-                if len(value) <= 30 and value.replace(' ', '').replace('-', '').replace('_', '').isalnum():
-                    safe_data[field] = value
+        if isinstance(parent_data, dict):
+            for field in safe_fields:
+                if field in parent_data:
+                    value = str(parent_data[field])
+                    if len(value) <= 30 and value.replace(' ', '').replace('-', '').replace('_', '').isalnum():
+                        safe_data[field] = value
         
-        # Get first variant only
-        first_variant = data_rows[0] if data_rows else {}
+        # Get first variant only with type safety
+        first_variant = data_rows[0] if (isinstance(data_rows, list) and data_rows) else {}
         safe_variant = {}
-        for field in safe_fields:
-            if field in first_variant:
-                value = str(first_variant[field])
-                if len(value) <= 30:
-                    safe_variant[field] = value
+        if isinstance(first_variant, dict):
+            for field in safe_fields:
+                if field in first_variant:
+                    value = str(first_variant[field])
+                    if len(value) <= 30:
+                        safe_variant[field] = value
         
         return f"""Map to Amazon fields:
 
@@ -438,23 +454,87 @@ Output:
         Returns:
             TransformationResult object
         """
-        # Extract main components
+        # CRITICAL: Handle both dict and list responses from AI
+        if isinstance(json_data, list) and len(json_data) > 0 and isinstance(json_data[0], dict):
+            # AI returned a list containing the actual data - extract first item
+            self.logger.info(f"AI returned list format for {parent_sku}, extracting first item")
+            json_data = json_data[0]
+        elif not isinstance(json_data, dict):
+            self.logger.error(
+                f"AI response is invalid for {parent_sku}, "
+                f"got {type(json_data).__name__}: {json_data}"
+            )
+            # Return minimal safe result
+            return TransformationResult(
+                parent_sku=parent_sku,
+                parent_data={},
+                variance_data={},
+                metadata={
+                    "confidence": 0.0,
+                    "processing_notes": f"Invalid AI response format: {type(json_data).__name__}",
+                    "original_response": str(json_data)
+                }
+            )
+        
+        # Extract main components with type safety
         parent_data = json_data.get("parent_data", {})
-        variance_data = json_data.get("variance_data", {})
-        metadata = json_data.get("metadata", {})
+        raw_variance_data = json_data.get("variance_data", {})
+        
+        # Handle variance_data as list (convert to dict) or dict
+        if isinstance(raw_variance_data, list):
+            # Convert list of variants to dict format expected by model
+            variance_data = {}
+            for i, variant in enumerate(raw_variance_data):
+                if isinstance(variant, dict):
+                    variance_data[f"variant_{i+1}"] = variant
+                else:
+                    self.logger.warning(f"Skipping invalid variant {i} for {parent_sku}: {type(variant).__name__}")
+        elif isinstance(raw_variance_data, dict):
+            variance_data = raw_variance_data
+        else:
+            self.logger.warning(f"Invalid variance_data type for {parent_sku}: {type(raw_variance_data).__name__}")
+            variance_data = {}
+        
+        # CRITICAL FIX: Ensure metadata is always a dictionary
+        raw_metadata = json_data.get("metadata", {})
+        if isinstance(raw_metadata, dict):
+            metadata = raw_metadata
+        else:
+            # If metadata is not a dict (e.g., a list), create a default dict
+            self.logger.warning(
+                f"AI response metadata is not a dict for {parent_sku}, "
+                f"got {type(raw_metadata).__name__}: {raw_metadata}"
+            )
+            metadata = {
+                "confidence": 0.0,
+                "processing_notes": f"Invalid metadata format: {type(raw_metadata).__name__}",
+                "original_metadata": str(raw_metadata)
+            }
         
         # Create mapped fields list (if available)
         mapped_fields = []
         if "mapped_fields" in json_data:
-            for field_mapping in json_data["mapped_fields"]:
-                if isinstance(field_mapping, dict):
-                    mapped_fields.append(MappingResult(
-                        source_field=field_mapping.get("source_field", "unknown"),
-                        target_field=field_mapping.get("target_field", "unknown"),
-                        mapped_value=field_mapping.get("mapped_value", ""),
-                        confidence=field_mapping.get("confidence", 0.0),
-                        reasoning=field_mapping.get("reasoning", "AI mapping")
-                    ))
+            raw_mapped_fields = json_data["mapped_fields"]
+            if isinstance(raw_mapped_fields, list):
+                for field_mapping in raw_mapped_fields:
+                    if isinstance(field_mapping, dict):
+                        mapped_fields.append(MappingResult(
+                            source_field=field_mapping.get("source_field", "unknown"),
+                            target_field=field_mapping.get("target_field", "unknown"),
+                            mapped_value=field_mapping.get("mapped_value", ""),
+                            confidence=field_mapping.get("confidence", 0.0),
+                            reasoning=field_mapping.get("reasoning", "AI mapping")
+                        ))
+                    else:
+                        self.logger.warning(
+                            f"Skipping invalid field_mapping (not a dict) for {parent_sku}: "
+                            f"{type(field_mapping).__name__}"
+                        )
+            else:
+                self.logger.warning(
+                    f"mapped_fields is not a list for {parent_sku}, "
+                    f"got {type(raw_mapped_fields).__name__}"
+                )
         
         return TransformationResult(
             parent_sku=parent_sku,
@@ -463,3 +543,55 @@ Output:
             mapped_fields=mapped_fields,
             metadata=metadata
         )
+    
+    def _safe_get_dict(self, obj: Any, key: str, default: Dict[str, Any]) -> Dict[str, Any]:
+        """Safely get a dictionary value from an object.
+        
+        Args:
+            obj: Object to get value from
+            key: Key to look for
+            default: Default value if key not found or value is not a dict
+            
+        Returns:
+            Dictionary value or default
+        """
+        if not isinstance(obj, dict):
+            self.logger.warning(
+                f"Expected dict for _safe_get_dict, got {type(obj).__name__}: {obj}"
+            )
+            return default
+        
+        value = obj.get(key, default)
+        if not isinstance(value, dict):
+            self.logger.warning(
+                f"Expected dict value for key '{key}', got {type(value).__name__}: {value}"
+            )
+            return default
+        
+        return value
+    
+    def _safe_get_list(self, obj: Any, key: str, default: List[Any]) -> List[Any]:
+        """Safely get a list value from an object.
+        
+        Args:
+            obj: Object to get value from
+            key: Key to look for
+            default: Default value if key not found or value is not a list
+            
+        Returns:
+            List value or default
+        """
+        if not isinstance(obj, dict):
+            self.logger.warning(
+                f"Expected dict for _safe_get_list, got {type(obj).__name__}: {obj}"
+            )
+            return default
+        
+        value = obj.get(key, default)
+        if not isinstance(value, list):
+            self.logger.warning(
+                f"Expected list value for key '{key}', got {type(value).__name__}: {value}"
+            )
+            return default
+        
+        return value

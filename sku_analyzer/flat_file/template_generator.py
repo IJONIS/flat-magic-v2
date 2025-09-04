@@ -367,8 +367,16 @@ Analyze and categorize now:"""
             # Check required keys in new format
             if 'parent_level_fields' in ai_result and 'variant_level_fields' in ai_result:
                 # New format - extract field names from nested objects
-                parent_fields = list(ai_result['parent_level_fields'].keys())
-                variant_fields = list(ai_result['variant_level_fields'].keys())
+                parent_level_data = ai_result['parent_level_fields']
+                variant_level_data = ai_result['variant_level_fields']
+                
+                if isinstance(parent_level_data, dict) and isinstance(variant_level_data, dict):
+                    parent_fields = list(parent_level_data.keys())
+                    variant_fields = list(variant_level_data.keys())
+                else:
+                    # If they're lists, use them directly
+                    parent_fields = parent_level_data if isinstance(parent_level_data, list) else []
+                    variant_fields = variant_level_data if isinstance(variant_level_data, list) else []
             elif 'parent_fields' in ai_result and 'variant_fields' in ai_result:
                 # Fallback format - simple lists
                 parent_fields = ai_result['parent_fields']

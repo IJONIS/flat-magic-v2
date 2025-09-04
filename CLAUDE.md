@@ -30,178 +30,6 @@ These principles override all other considerations when programming new code or 
 
 **This is a CRITICAL requirement - over-complication has been a persistent issue.**
 
-## Development Workflow – Phase-Based Execution
-
-Follow a unified development framework with automatic phase detection, parallel agent orchestration, and MCP server utilization.
-
-### CRITICAL: Parallel Agent Orchestration
-**Evaluate after EVERY message**: Identify tasks that can be delegated to specialized agents in `/.claude/agents/` for parallel execution.
-
-**Agent Delegation Strategy**
-- **Multi-file operations** (>3 files): `general-purpose`
-- **Python expertise needed**: `python-expert`
-- **Architecture decisions**: `system-architect`
-- **Code quality/refactoring**: `refactoring-expert`
-- **Testing strategy**: `quality-engineer`
-- **Performance optimization**: `performance-engineer`
-- **Requirements analysis**: `requirements-analyst`
-- **Documentation**: `technical-writer`
-- **Security validation**: `security-engineer`
-
-**MCP Server Integration** (evaluate and use as needed)
-- **Context7**: Official library docs (e.g., pandas, openpyxl, Google AI SDK)
-- **Sequential**: Complex pipeline analysis & system design
-- **Serena**: Semantic code ops & project memory
-- **Playwright**: Browser-based testing/validation
-
-**Parallel Execution Rules**
-1. Always assess if current work can be split across agents.
-2. Delegate immediately when >3 files or complex analysis is involved.
-3. Use MCP servers for specialized capabilities (docs, analysis, memory).
-4. Coordinate and reconcile agent outputs before proceeding.
-5. Document delegation in commit messages with agent IDs.
-
-**Delegation Decision Matrix**
-```
-Task Type                           | Agent + MCP Server
------------------------------------|--------------------------
-Excel/CSV parsing                   | python-expert + Context7
-Pipeline/architecture               | system-architect + Sequential
-Multi-module implementation         | general-purpose + Serena
-Performance optimization            | performance-engineer + Sequential
-Test strategy & coverage            | quality-engineer + Serena
-Code refactoring                    | refactoring-expert + Serena
-Documentation & traceability        | technical-writer + Serena
-Security review                     | security-engineer + Sequential
-Requirements analysis               | requirements-analyst + Context7
-```
-
-**MANDATORY**: Before responding to any request, explicitly state which agents and MCP servers will be utilized and why.
-
-### Phase Detection Triggers
-- **Permissions Check**: Inspect `global settings.json` to know where/when to request perms.
-- **Planning Phase**: “plan/design/requirements” signals.
-- **Execution Phase**: “implement/code/build/create” signals.
-- **Review Phase**: “review/check/validate/test” signals.
-
----
-
-## Pipeline Step Validation Requirements
-
-**Purpose**: Ensure data integrity and immediate failure detection when pipeline steps fail to produce required outputs.
-
-### Step Completion Validation
-The `completion_check()` function enforces strict file existence requirements:
-
-**Step 1 (Analysis)**: 
-- **Required**: `analysis_results.json` must exist
-- **Failure**: Pipeline stops immediately if file missing
-
-**Step 2 (CSV Export)**:
-- **Required**: `parent_*/data.csv` files must exist (when CSV export enabled)
-- **Validation**: Checks each parent folder for corresponding CSV file
-- **Failure**: Pipeline stops if any expected CSV file is missing
-
-**Step 3 (Compression)**:
-- **Required**: `parent_*/step2_compressed.json` files must exist (when compression enabled)
-- **Validation**: Verifies compressed output for each parent directory
-- **Failure**: Pipeline stops if any expected compressed file is missing
-
-### Data Integrity Enforcement
-- **No Partial Results**: Pipeline fails fast rather than continuing with incomplete data
-- **File Existence Only**: Validation checks presence, not content validity
-- **Configuration Aware**: Only validates files that should exist based on current settings
-- **Immediate Termination**: Any missing file causes complete pipeline abort
-
----
-
-## 1) Planning Phase
-
-**Agent Utilization**
-- `requirements-analyst`, `system-architect`
-- MCP: **Sequential** (architecture), **Context7** (library selection)
-
-**Required Outputs**
-- **Overview**: 2–4 sentences summarizing the goal.
-- **Function List**: Each function with a 1–3 sentence purpose.
-- **Acceptance Criteria (AC)**: 5–10+ criteria across:
-  - **AC-F** Functional (Gherkin Given/When/Then)
-  - **AC-E** Edge/Error cases with typed errors, no mutation, logging
-  - **AC-N** Non-functional (quantified perf/observability/i18n/accessibility)
-  - **AC-D** Data integrity (idempotency/transactional safety)
-- **Test Plan**: Unit scopes mapped to AC IDs; targets ≥80% lines, ≥70% branches; test data strategy.
-
-**Enterprise Sanity Check**
-- “Is this overbuilt for pre-customer? Remove needless fallbacks/versioning/testing bloat.”
-
-**Example AC Template**
-```
-AC-F1: Given valid input
-       When the pipeline runs
-       Then structured output is produced according to the schema
-
-AC-E1: Given malformed input
-       When processing starts
-       Then FileFormatError is raised, no mutation occurs, and a warn log is emitted
-
-AC-N1: Given 100 items
-       When processed in batch
-       Then p95 latency ≤ 50ms per batch
-
-AC-D1: Given the same input processed twice
-       When executed
-       Then the output is identical (idempotent)
-```
-
----
-
-## 2) Execution Phase
-
-**Agent Utilization**
-- `python-expert`, `general-purpose`, `performance-engineer`, `quality-engineer`
-- MCP: **Context7** (docs), **Serena** (memory/symbol ops)
-
-**Required Process (tight TDD loop per AC)**
-1. Write failing unit test(s) for the next AC.
-2. Implement minimal code to pass.
-3. Lint & compile.
-4. Run tests.
-5. Refactor (clarity/DRY). Re-run tests.
-6. Commit with message linking AC IDs and Test IDs.
-
-**Unit Test Requirements (per function)**
-- Happy path (maps to AC-F*)
-- Boundaries (min/max, empty, unicode, large payloads)
-- Errors & exceptions (AC-E*)
-- Idempotency/retry semantics (AC-D1)
-- Performance micro-checks (AC-N1)
-- Analytics/log events (e.g., AC-N* for observability)
-- i18n/locale behaviors (AC-N*)
-
-**Test Skeleton**
-```python
-describe "module_under_test":
-  it "T-F1: satisfies AC-F1 - processes input as specified"
-  it "T-E1: raises ExpectedError and leaves state unchanged"
-  it "T-D1: is idempotent on duplicate execution"
-  it "T-N*: emits telemetry event with expected payload"
-```
-
-**Post Development Run**
-- In the final response, list **all** files edited so they can be inspected.
-
-**Data Quality Rules**
-- **NO MOCK DATA (in production)**: Do not use placeholders/fake/hardcoded values.
-- **DYNAMIC DATA ONLY**: Derive values from actual inputs/templates/configs.
-- **REAL VALIDATION RULES**: Extract constraints from real schemas/specs.
-- **NO HARDCODED CONSTANTS**: Make values configurable or derive from inputs.
-- **DATA INTEGRITY**: Maintain genuine data flows; avoid simulated responses.
-- **ASK FOR MOCKS** (only if unavoidable in dev): Explicitly request exact mock specs.
-
-**Development Rules**
-- Think hard; write elegant, minimal code.
-- Implement only what's needed **now**.
-
 ### 2. NO BACKWARDS COMPATIBILITY
 - **NEVER** include backwards compatibility measures
 - **NEVER** suggest legacy fallbacks or support for older systems
@@ -224,30 +52,6 @@ describe "module_under_test":
 - **No file duplication**: Avoid suffixes like `_fix`, `_v2`, etc.
 - **No backup copies**: Use version control for history.
 - **No MD summaries**: Do NOT create markdown files after development steps unless specifically requested. Avoid creating analysis.md, summary.md, or similar documentation files that become outdated and unmaintained.
-
----
-
-## 3) Review Phase
-
-**Agent Utilization**
-- `refactoring-expert`, `security-engineer`, `quality-engineer`, `performance-engineer`, `technical-writer`
-
-**Required Verification**
-- All ACs present with 1:1 test mapping (traceability table).
-- Coverage targets met (≥80% lines, ≥70% branches).
-- No flaky tests; meaningful assertions.
-- No premature abstractions, dead code, or needless versioning.
-- Observability events & error taxonomy consistent.
-- Code is clean, readable, and DRY.
-
-**PR Traceability Table (mandatory)**
-```
-AC ID    File(s) touched              Test ID(s)    Status
-AC-F1    pkg/core/module.py           T-F1          Pass
-AC-E1    pkg/core/module.py           T-E1          Pass
-AC-D1    pkg/core/module.py           T-D1          Pass
-AC-N*    pkg/core/telemetry.py        T-N*          Pass
-```
 
 ---
 
@@ -291,3 +95,178 @@ AC-N*    pkg/core/telemetry.py        T-N*          Pass
 - **Logging**: Structured logs with levels (DEBUG/INFO/WARN/ERROR).
 - **Resource Management**: Use context managers for files/conns.
 - **Security**: No secrets in code; sanitize all inputs.
+
+## Project Overview
+
+SKU Pattern Analyzer - A production-ready Python 3.12+ application for analyzing SKU parent-child relationships in Excel files with AI-enhanced mapping and compression optimization.
+
+## Architecture & Pipeline
+
+### Processing Pipeline (5 Steps)
+1. **Step 1**: Template analysis (`flat_file_analysis/step1_template_columns.json`)
+2. **Step 2**: Value extraction (`flat_file_analysis/step2_valid_values.json`)
+3. **Step 3**: Mandatory fields (`flat_file_analysis/step3_mandatory_fields.json`)
+4. **Step 4**: Template structure (`flat_file_analysis/step4_template.json`)
+5. **Step 5**: AI mapping (`parent_*/step5_ai_mapping.json`)
+
+### Core Modules
+- `sku_analyzer/core/`: Main processing (analyzer.py, hierarchy.py, compressor.py)
+- `sku_analyzer/flat_file/`: Template analysis and extraction
+- `sku_analyzer/step5_mapping/`: AI-powered mapping with Gemini API
+- `sku_analyzer/optimization/`: Performance optimization and compression
+
+### Output Structure
+```
+production_output/
+└── [job_id]/
+    ├── flat_file_analysis/
+    │   ├── step1_template_columns.json
+    │   ├── step2_valid_values.json
+    │   ├── step3_mandatory_fields.json
+    │   └── step4_template.json
+    ├── parent_[sku]/
+    │   ├── data.csv
+    │   ├── step2_compressed.json
+    │   └── step5_ai_mapping.json
+    └── analysis_[job_id].json
+```
+
+## Common Commands
+
+### Running the Application
+```bash
+# Standard processing with compression
+python main.py "path/to/file.xlsx"
+
+# With performance benchmarking
+python main.py "path/to/file.xlsx" --full-bench
+
+# Without CSV export
+python main.py "path/to/file.xlsx" --no-csv
+
+# Test with sample files
+python main.py "test-files/EIKO Stammdaten.xlsx"
+```
+
+### Testing
+```bash
+# Run performance tests
+python test_optimized_performance.py
+
+# Test AI mapping safety filters
+python test_safety_filter_robustness.py
+
+# Execute complete workflow test
+python test_file_workflow_executor.py
+```
+
+### Development
+```bash
+# Code formatting
+black . --target-version py312 --line-length 100
+
+# Linting
+ruff check . --target-version py312 --line-length 100 --select E,F,W,I,N,UP
+
+# Type checking
+mypy . --python-version 3.12 --strict
+
+# Install dependencies
+pip install -r requirements.txt
+pip install -r requirements_performance.txt
+```
+
+## Key Implementation Details
+
+### Pipeline Validation
+The `completion_check()` function in `analyzer.py` enforces strict validation:
+- Verifies all expected files exist at each step
+- Fails fast if any required output is missing
+- Configuration-aware (only validates enabled features)
+
+### AI Mapping Integration
+- Uses Google Gemini API for intelligent field mapping
+- Implements robust safety filter handling
+- Automatic retry logic for blocked content
+- Format enforcement for consistent output
+
+### Performance Optimizations
+- Compression achieves ~71% reduction
+- JSON serialization 15x faster with orjson
+- Parallel processing for multi-parent datasets
+- Automatic blank column removal
+
+## Critical Patterns
+
+### Error Handling
+- All AI API calls wrapped with safety filter recovery
+- Structured logging at each pipeline step
+- Job-based isolation prevents conflicts
+- Automatic validation after each step
+
+### Data Flow
+1. Excel → Pandas DataFrame (with dtype optimization)
+2. Pattern extraction using delimiter-based hierarchy
+3. Parent grouping with confidence scoring
+4. CSV export with blank column removal
+5. JSON compression with redundancy analysis
+6. AI mapping with template-based transformation
+
+## Dependencies
+
+### Core Requirements
+- Python 3.12+
+- pandas>=2.2.0 (DataFrame operations)
+- openpyxl>=3.1.0 (Excel reading)
+- orjson>=3.11.3 (Fast JSON serialization)
+- pydantic>=2.11.7 (Data validation)
+- google-generativeai (AI mapping)
+
+### Performance Libraries
+- ujson (Alternative JSON encoder)
+- orjson (Primary high-performance JSON)
+
+## Important Notes
+
+1. **Job Management**: Each run creates a unique job ID to prevent conflicts
+2. **Step Dependencies**: Steps 3-5 require successful completion of previous steps
+3. **AI Safety**: Gemini API may block responses - automatic retry handles this
+4. **Memory Usage**: Large files processed with chunking to avoid memory issues
+5. **Deterministic Output**: All operations sorted for reproducible results
+
+## Testing Strategy
+
+When modifying the pipeline:
+1. Run `test_optimized_performance.py` to verify performance targets
+2. Test with `test-files/EIKO Stammdaten.xlsx` for baseline validation
+3. Check `completion_check()` passes for all steps
+4. Verify AI mapping with `test_safety_filter_robustness.py`
+
+## Global Expert Agent Pool
+Your professional agents are available globally via Claude Code:
+- **requirements-analyst** - Transform ambiguous ideas into concrete specifications
+- **system-architect** - Design scalable architecture with maintainability focus  
+- **backend-architect** - Reliable backend systems, APIs, databases, security
+- **frontend-architect** - Accessible, performant UI with modern frameworks
+- **python-expert** - Production-ready Python code following SOLID principles
+- **security-engineer** - Vulnerability assessment and compliance verification
+- **performance-engineer** - Measurement-driven optimization and bottleneck elimination
+- **quality-engineer** - Comprehensive testing strategies and systematic QA
+- **refactoring-expert** - Code quality improvement and technical debt reduction
+- **root-cause-analyst** - Systematic problem investigation and evidence-based analysis
+- **technical-writer** - Clear, comprehensive documentation for specific audiences
+
+## Context Management Protocol
+**MANDATORY for ALL agents:**
+1. **READ FIRST**: `@context/current-state.md` - Current project status
+2. **CHECK HANDOFF**: `@context/handoff-{your-agent-name}.md` - Your specific tasks
+3. **UPDATE STATUS**: Add your work to current-state.md when starting/finishing
+4. **CREATE HANDOFFS**: Write `context/handoff-{next-agent}.md` when passing work
+
+## Agent Invocation
+Since your agents are global, use:
+```bash
+claude @requirements-analyst
+claude @backend-architect  
+claude @frontend-architect
+# etc.

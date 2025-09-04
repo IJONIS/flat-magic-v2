@@ -114,8 +114,8 @@ class MappingProcessor:
                     max_fields=self.ai_config.max_variants_per_request
                 )
                 
-                # Extract essential template structure
-                template_structure = template_data.get("template_structure", {})
+                # Extract essential template structure with type safety
+                template_structure = self._safe_get_dict(template_data, "template_structure", {})
                 essential_template_fields = self.prompt_optimizer.extract_essential_template_fields(
                     template_structure
                 )
@@ -133,8 +133,14 @@ class MappingProcessor:
                 mapping_result = await self.ai_mapper.execute_mapping_with_retry(mapping_input)
                 
                 # Enforce format compliance efficiently
+                try:
+                    result_dict = mapping_result.model_dump() if hasattr(mapping_result, 'model_dump') else {}
+                except Exception as e:
+                    self.logger.error(f"Failed to dump mapping result: {e}")
+                    result_dict = {}
+                
                 compliant_result, format_warnings = self.format_enforcer.enforce_format(
-                    mapping_result.model_dump(), parent_sku, strict=False
+                    result_dict, parent_sku, strict=False
                 )
                 
                 if format_warnings:
@@ -148,10 +154,12 @@ class MappingProcessor:
                 processing_time = (time.perf_counter() - start_time) * 1000  # Convert to ms
                 self.result_formatter.update_processing_stats(mapping_result, processing_time / 1000)
                 
-                # Calculate performance metrics
-                variant_count = compliant_result.get("metadata", {}).get("total_variants", 0)
-                confidence = compliant_result.get("metadata", {}).get("confidence", 0.0)
-                unmapped_count = len(compliant_result.get("metadata", {}).get("unmapped_mandatory", []))
+                # Calculate performance metrics with type safety
+                metadata = self._safe_get_dict(compliant_result, "metadata", {})
+                variant_count = metadata.get("total_variants", 0) if isinstance(metadata, dict) else 0
+                confidence = metadata.get("confidence", 0.0) if isinstance(metadata, dict) else 0.0
+                unmapped_mandatory = self._safe_get_list(metadata, "unmapped_mandatory", [])
+                unmapped_count = len(unmapped_mandatory)
                 
                 return ProcessingResult(
                     parent_sku=parent_sku,
@@ -491,6 +499,58 @@ class MappingProcessor:
         # Return the most significant bottleneck
         primary_bottleneck = max(bottlenecks, key=lambda x: x[1])
         return primary_bottleneck[0]
+    
+    def _safe_get_dict(self, obj: Any, key: str, default: Dict[str, Any]) -> Dict[str, Any]:
+        """Safely get a dictionary value from an object.
+        
+        Args:
+            obj: Object to get value from
+            key: Key to look for
+            default: Default value if key not found or value is not a dict
+            
+        Returns:
+            Dictionary value or default
+        """
+        if not isinstance(obj, dict):
+            self.logger.warning(
+                f"Expected dict for _safe_get_dict, got {type(obj).__name__}: {obj}"
+            )
+            return default
+        
+        value = obj.get(key, default)
+        if not isinstance(value, dict):
+            self.logger.warning(
+                f"Expected dict value for key '{key}', got {type(value).__name__}: {value}"
+            )
+            return default
+        
+        return value
+    
+    def _safe_get_list(self, obj: Any, key: str, default: List[Any]) -> List[Any]:
+        """Safely get a list value from an object.
+        
+        Args:
+            obj: Object to get value from
+            key: Key to look for
+            default: Default value if key not found or value is not a list
+            
+        Returns:
+            List value or default
+        """
+        if not isinstance(obj, dict):
+            self.logger.warning(
+                f"Expected dict for _safe_get_list, got {type(obj).__name__}: {obj}"
+            )
+            return default
+        
+        value = obj.get(key, default)
+        if not isinstance(value, list):
+            self.logger.warning(
+                f"Expected list value for key '{key}', got {type(value).__name__}: {value}"
+            )
+            return default
+        
+        return value
     
     def get_performance_stats(self) -> Dict[str, Any]:
         """Get comprehensive performance statistics with optimization insights."""
