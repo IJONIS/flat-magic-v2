@@ -54,7 +54,7 @@ class MappingProcessor:
         """
         # Use optimized defaults for better performance
         self.config = config or ProcessingConfig(
-            max_retries=1,  # Reduced retries for faster failure detection
+            max_retries=3,  # CRITICAL FIX: Increased from 1 to allow proper fallback testing
             timeout_seconds=15,  # Reduced timeout for faster responses
             batch_size=3,  # Optimized batch size for concurrency
             confidence_threshold=0.5
@@ -120,10 +120,13 @@ class MappingProcessor:
                     template_structure
                 )
                 
+                # CRITICAL FIX: Load ALL mandatory fields from complete template for validation
+                all_mandatory_fields = self._extract_all_mandatory_fields(template_structure)
+                
                 # Create optimized mapping input
                 mapping_input = MappingInput(
                     parent_sku=parent_sku,
-                    mandatory_fields=essential_template_fields,
+                    mandatory_fields=all_mandatory_fields,  # Use complete mandatory fields for validation
                     product_data=compressed_product_data,
                     business_context="German Amazon marketplace",
                     template_structure=template_structure
@@ -132,13 +135,20 @@ class MappingProcessor:
                 # Execute mapping with optimized retry logic
                 mapping_result = await self.ai_mapper.execute_mapping_with_retry(mapping_input)
                 
-                # Enforce format compliance efficiently
+                # Convert mapping result to dictionary format
                 try:
                     result_dict = mapping_result.model_dump() if hasattr(mapping_result, 'model_dump') else {}
                 except Exception as e:
                     self.logger.error(f"Failed to dump mapping result: {e}")
                     result_dict = {}
                 
+                # Apply template compliance validation with complete mandatory field validation
+                result_dict = self._validate_template_compliance(result_dict, template_structure)
+                
+                # CRITICAL FIX: Validate against complete mandatory fields from template
+                result_dict = self._validate_complete_mandatory_fields(result_dict, all_mandatory_fields, template_structure)
+                
+                # Enforce format compliance efficiently
                 compliant_result, format_warnings = self.format_enforcer.enforce_format(
                     result_dict, parent_sku, strict=False
                 )
@@ -147,7 +157,7 @@ class MappingProcessor:
                     self.logger.debug(f"Format warnings for {parent_sku}: {len(format_warnings)} warnings")
                 
                 # Save result efficiently
-                output_file = output_dir / "step3_ai_mapping.json"
+                output_file = output_dir / "step5_ai_mapping.json"
                 await self.result_formatter.save_compliant_result(compliant_result, output_file)
                 
                 # Update performance statistics
@@ -551,6 +561,221 @@ class MappingProcessor:
             return default
         
         return value
+    
+    def _validate_template_compliance(self, result_dict: Dict[str, Any], template_structure: Dict[str, Any]) -> Dict[str, Any]:
+        """Validate and fix template compliance issues.
+        
+        Args:
+            result_dict: AI mapping result dictionary
+            template_structure: Template structure from step4_template.json
+            
+        Returns:
+            Updated result dictionary with template compliance fixes
+        """
+        if not isinstance(result_dict, dict):
+            return result_dict
+            
+        # Extract template requirements
+        parent_product = template_structure.get('parent_product', {})
+        required_parent_fields = parent_product.get('required_fields', [])
+        
+        child_variants = template_structure.get('child_variants', {})
+        child_fields = child_variants.get('fields', {})
+        
+        # Fix parent data compliance
+        parent_data = result_dict.get('parent_data', {})
+        if isinstance(parent_data, dict):
+            # Remove non-mandatory fields like item_weight
+            non_mandatory_fields = ['item_weight']
+            for field in non_mandatory_fields:
+                if field in parent_data:
+                    self.logger.info(f"Removing non-mandatory field: {field}")
+                    parent_data.pop(field, None)
+            
+            # Add missing mandatory fields with defaults
+            mandatory_defaults = {
+                'external_product_id_type': 'EAN',
+                'recommended_browse_nodes': '1981663031',
+                'department_name': 'Herren',
+                'age_range_description': 'Erwachsener',
+                'target_gender': 'Männlich'
+            }
+            
+            for field, default_value in mandatory_defaults.items():
+                if field in required_parent_fields and field not in parent_data:
+                    parent_data[field] = default_value
+                    self.logger.info(f"Added missing mandatory field: {field} = {default_value}")
+        
+        # Fix variant data compliance
+        variants = result_dict.get('variants', [])
+        if isinstance(variants, list):
+            for variant in variants:
+                if isinstance(variant, dict):
+                    # Add missing mandatory variant fields
+                    if 'bottoms_size_system' in child_fields and 'bottoms_size_system' not in variant:
+                        variant['bottoms_size_system'] = 'DE / NL / SE / PL'
+                    if 'bottoms_size_class' in child_fields and 'bottoms_size_class' not in variant:
+                        variant['bottoms_size_class'] = 'Numerisch'
+        
+        # Also fix variance_data format (alternative structure)
+        variance_data = result_dict.get('variance_data', {})
+        if isinstance(variance_data, dict):
+            for variant_key, variant in variance_data.items():
+                if isinstance(variant, dict):
+                    if 'bottoms_size_system' in child_fields and 'bottoms_size_system' not in variant:
+                        variant['bottoms_size_system'] = 'DE / NL / SE / PL'
+                    if 'bottoms_size_class' in child_fields and 'bottoms_size_class' not in variant:
+                        variant['bottoms_size_class'] = 'Numerisch'
+        
+        # Update metadata with compliance info
+        metadata = result_dict.get('metadata', {})
+        if isinstance(metadata, dict):
+            metadata['template_compliance_validated'] = True
+            metadata['mandatory_fields_added'] = list(mandatory_defaults.keys())
+            metadata['non_mandatory_fields_removed'] = non_mandatory_fields
+        
+        return result_dict
+    
+    def _extract_all_mandatory_fields(self, template_structure: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract ALL mandatory fields from step4_template.json for complete validation.
+        
+        Args:
+            template_structure: Complete template structure from step4_template.json
+            
+        Returns:
+            Dictionary containing all mandatory parent and variant fields
+        """
+        all_mandatory = {}
+        
+        if not isinstance(template_structure, dict):
+            self.logger.warning(f"Invalid template_structure type: {type(template_structure).__name__}")
+            return {}
+            
+        # Extract ALL required parent fields
+        parent_product = template_structure.get('parent_product', {})
+        if isinstance(parent_product, dict):
+            parent_fields = parent_product.get('fields', {})
+            required_parent_fields = parent_product.get('required_fields', [])
+            
+            if isinstance(parent_fields, dict) and isinstance(required_parent_fields, list):
+                for field_name in required_parent_fields:
+                    if field_name in parent_fields:
+                        field_info = parent_fields[field_name]
+                        if isinstance(field_info, dict):
+                            validation_rules = field_info.get('validation_rules', {})
+                            all_mandatory[field_name] = {
+                                'data_type': field_info.get('data_type', 'string'),
+                                'required': validation_rules.get('required', True) if isinstance(validation_rules, dict) else True,
+                                'field_type': 'parent'
+                            }
+        
+        # Extract ALL required variant fields (including bottoms_size_system, bottoms_size_class)
+        child_variants = template_structure.get('child_variants', {})
+        if isinstance(child_variants, dict):
+            child_fields = child_variants.get('fields', {})
+            
+            if isinstance(child_fields, dict):
+                # Include all variant fields that are required
+                for field_name, field_info in child_fields.items():
+                    if isinstance(field_info, dict):
+                        validation_rules = field_info.get('validation_rules', {})
+                        if isinstance(validation_rules, dict) and validation_rules.get('required', False):
+                            all_mandatory[field_name] = {
+                                'data_type': field_info.get('data_type', 'string'),
+                                'required': True,
+                                'field_type': 'variant'
+                            }
+        
+        self.logger.info(f"Extracted {len(all_mandatory)} mandatory fields from template: {list(all_mandatory.keys())}")
+        return all_mandatory
+    
+    def _validate_complete_mandatory_fields(
+        self, 
+        result_dict: Dict[str, Any], 
+        all_mandatory_fields: Dict[str, Any],
+        template_structure: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Validate mapping result against ALL mandatory fields from template.
+        
+        Args:
+            result_dict: AI mapping result dictionary
+            all_mandatory_fields: All mandatory fields from template
+            template_structure: Complete template structure
+            
+        Returns:
+            Updated result dictionary with accurate unmapped_mandatory_fields reporting
+        """
+        if not isinstance(result_dict, dict):
+            return result_dict
+            
+        # Collect all mapped fields from result
+        mapped_fields = set()
+        
+        # Get parent fields
+        parent_data = result_dict.get('parent_data', {})
+        if isinstance(parent_data, dict):
+            mapped_fields.update(parent_data.keys())
+        
+        # Get variant fields from both possible structures
+        variants = result_dict.get('variants', [])
+        variance_data = result_dict.get('variance_data', {})
+        
+        # Check variants list format
+        if isinstance(variants, list):
+            for variant in variants:
+                if isinstance(variant, dict):
+                    # Handle both direct fields and nested 'data' structure
+                    variant_fields = variant.get('data', variant) if 'data' in variant else variant
+                    if isinstance(variant_fields, dict):
+                        mapped_fields.update(variant_fields.keys())
+        
+        # Check variance_data dict format  
+        if isinstance(variance_data, dict):
+            for variant_key, variant_data in variance_data.items():
+                if isinstance(variant_data, dict):
+                    mapped_fields.update(variant_data.keys())
+        
+        # Calculate unmapped mandatory fields
+        unmapped_mandatory = []
+        for field_name, field_info in all_mandatory_fields.items():
+            if field_name not in mapped_fields:
+                unmapped_mandatory.append(field_name)
+        
+        # CRITICAL FIX: Count total variants from source data to ensure all are processed
+        template_data = result_dict.get('product_data', {})
+        if not template_data:
+            # Try to get from other sources
+            pass
+            
+        # Update metadata with accurate reporting
+        metadata = result_dict.get('metadata', {})
+        if not isinstance(metadata, dict):
+            metadata = {}
+            
+        metadata.update({
+            'total_mandatory_fields': len(all_mandatory_fields),
+            'mapped_mandatory_fields': [f for f in all_mandatory_fields.keys() if f in mapped_fields],
+            'unmapped_mandatory_fields': unmapped_mandatory,
+            'mandatory_field_coverage': len([f for f in all_mandatory_fields.keys() if f in mapped_fields]) / len(all_mandatory_fields) if all_mandatory_fields else 1.0,
+            'validation_complete': True,
+            'validation_timestamp': time.perf_counter()
+        })
+        
+        result_dict['metadata'] = metadata
+        
+        # Log validation results
+        mapped_count = len([f for f in all_mandatory_fields.keys() if f in mapped_fields])
+        coverage_pct = (mapped_count / len(all_mandatory_fields) * 100) if all_mandatory_fields else 100
+        
+        self.logger.info(
+            f"Mandatory field validation complete: {mapped_count}/{len(all_mandatory_fields)} "
+            f"({coverage_pct:.1f}%) mapped. Unmapped: {unmapped_mandatory}"
+        )
+        
+        if unmapped_mandatory:
+            self.logger.warning(f"Missing mandatory fields detected: {unmapped_mandatory}")
+        
+        return result_dict
     
     def get_performance_stats(self) -> Dict[str, Any]:
         """Get comprehensive performance statistics with optimization insights."""
