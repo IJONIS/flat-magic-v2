@@ -192,7 +192,7 @@ class BatchProcessor:
                 try:
                     result = await processor_func(
                         parent_sku,
-                        base_output_dir / "flat_file_analysis" / "step4_template.json",
+                        base_output_dir / "flat_file_analysis" / "step3_mandatory_fields.json",
                         base_output_dir / f"parent_{parent_sku}" / "step2_compressed.json",
                         base_output_dir / f"parent_{parent_sku}"
                     )

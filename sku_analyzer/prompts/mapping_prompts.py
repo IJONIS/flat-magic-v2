@@ -19,25 +19,25 @@ class MappingPromptManager(BasePromptManager):
     """
     
     def get_system_prompt(self) -> str:
-        """Get system prompt for mapping operations.
+        """Get comprehensive system prompt for mapping operations.
         
         Returns:
             System prompt for AI mapping
         """
         return (
-            "You are an expert German Amazon product data mapper. "
-            "Your task is to map product data to mandatory Amazon fields "
-            "using template guidance and semantic understanding."
+            "You are an expert e-commerce data transformation specialist with deep knowledge of German marketplace operations and Amazon's complex product taxonomy. "
+            "Your task is to perform a sophisticated mapping of authentic German workwear product data to Amazon's stringent marketplace format, "
+            "ensuring complete compliance with all field requirements and maintaining the authentic product characteristics."
         )
     
     def render_mapping_prompt(self, context: Dict[str, Any]) -> str:
-        """Render complete mapping prompt with context.
+        """Render comprehensive mapping prompt with full context.
         
         Args:
-            context: Mapping context including parent_sku, mandatory_fields, etc.
+            context: Mapping context including parent_sku, mandatory_fields, product_data, template_structure
             
         Returns:
-            Complete mapping prompt
+            Comprehensive mapping prompt following optimal Gemini format
         """
         # Validate required context
         required_fields = ['parent_sku', 'mandatory_fields', 'product_data']
@@ -45,62 +45,93 @@ class MappingPromptManager(BasePromptManager):
         if missing:
             raise ValueError(f"Missing required context fields: {missing}")
         
-        # Limit data sizes for prompt efficiency
-        limited_fields = self.limit_data_size(
-            context['mandatory_fields'], 
-            self.default_data_limits['mandatory_fields']
-        )
+        # Get template structure if available
+        template_structure = context.get('template_structure', {})
         
-        product_data = context['product_data'].get('parent_data', {})
-        limited_product = self.limit_data_size(
-            product_data, 
-            self.default_data_limits['product_data']
-        ) if product_data else {}
-        
-        # Create template guidance section
-        template_guidance = self._create_template_guidance(
-            context.get('template_structure')
-        )
-        
-        # Build complete prompt
-        prompt = f"""{self.get_system_prompt()}
+        # Build comprehensive prompt optimized for structured output
+        prompt = f"""### **MISSION STATEMENT**
+{self.get_system_prompt()}
 
-TASK: Map product data for parent SKU {context['parent_sku']} to mandatory Amazon fields.
-{template_guidance}
-MANDATORY FIELDS (showing first {len(limited_fields)}):
-{self.format_json_data(limited_fields)}
+### **CRITICAL REQUIREMENTS**
+1. **ZERO TRUNCATION**: Process ALL product variants - every single variant must be mapped
+2. **AUTHENTIC DATA**: Use only real source values from the compressed product data - NO placeholder or mock data
+3. **COMPLETE FIELD COVERAGE**: Map all 23 mandatory Amazon marketplace fields (14 parent + 9 variant fields)
+4. **STRUCTURED OUTPUT**: Data will be automatically formatted using the predefined schema structure
+5. **INHERITANCE ACCURACY**: Properly implement parent-child field inheritance
+6. **BUSINESS LOGIC**: Apply intelligent mapping decisions based on product characteristics
+7. **OUTPUT LANGUAGE**: German
 
-PRODUCT DATA (showing first {len(limited_product)}):
-{self.format_json_data(limited_product)}
-{self._get_mapping_instructions()}
-{self._get_output_format(context['parent_sku'])}
-Map the product data now:"""
+---
+
+## 📋 FIELD MAPPING REQUIREMENTS
+
+### Parent Data Fields (14 required):
+- age_range_description: Target age range
+- bottoms_size_class: Size classification system
+- bottoms_size_system: Specific size system (e.g., DE/NL/SE/PL)
+- brand_name: Product brand name
+- country_of_origin: Manufacturing country
+- department_name: Product department/category
+- external_product_id_type: ID type (EAN, UPC, etc.)
+- fabric_type: Primary fabric material
+- feed_product_type: Product type for feeds
+- item_name: Product name/title
+- main_image_url: Primary product image URL
+- outer_material_type: Outer layer material
+- recommended_browse_nodes: Category/browse node ID
+- target_gender: Target gender (Männlich/Weiblich/Unisex)
+
+### Variant Data Fields (9 required per variant):
+- color_map: Standardized color name
+- color_name: Specific color name
+- external_product_id: Unique variant identifier (EAN)
+- item_sku: Variant SKU
+- list_price_with_tax: Price including tax
+- quantity: Available quantity
+- size_map: Standardized size name
+- size_name: Specific size name
+- standard_price: Base price excluding tax
+
+---
+
+## 📊 SOURCE PRODUCT DATA
+
+```json
+{self.format_json_data(context['product_data'])}
+```
+
+---
+
+## 🧠 MAPPING INSTRUCTIONS
+
+Transform the authentic German workwear product data above to populate all required fields:
+
+1. **Extract Parent Information**: Identify common attributes shared across all variants
+2. **Map Individual Variants**: Process each unique size/color combination
+3. **Apply Business Logic**: Use intelligent field derivation and German marketplace knowledge
+4. **Ensure Data Quality**: Validate all mappings and apply appropriate defaults where needed
+
+**Key Mapping Guidelines:**
+- Use authentic source values wherever possible
+- Apply German marketplace conventions
+- Derive missing values using business logic
+- Maintain consistency across variants
+- Follow Amazon's field validation requirements
+
+The structured output schema will automatically format your response correctly."""
         
         return prompt
     
     def _create_template_guidance(self, template_structure: Optional[Dict[str, Any]]) -> str:
-        """Create template guidance section.
+        """Create template guidance section - now returns empty string.
         
         Args:
-            template_structure: Template structure for guidance
+            template_structure: Template structure for guidance (unused)
             
         Returns:
-            Formatted template guidance section
+            Empty string (no template guidance)
         """
-        if not template_structure:
-            return ""
-        
-        parent_fields = template_structure.get('parent_product', {}).get('fields', {})
-        variant_fields = template_structure.get('child_variants', {}).get('fields', {})
-        
-        if not parent_fields and not variant_fields:
-            return ""
-        
-        return f"""
-TEMPLATE GUIDANCE:
-Parent-level fields (shared across variants): {list(parent_fields.keys())[:10]}
-Variant-level fields (unique per variant): {list(variant_fields.keys())[:10]}
-"""
+        return ""
     
     def _get_mapping_instructions(self) -> str:
         """Get mapping instructions.
@@ -111,7 +142,7 @@ Variant-level fields (unique per variant): {list(variant_fields.keys())[:10]}
         instructions = [
             "Map source fields to mandatory fields based on semantic meaning",
             "Consider German language context and Amazon marketplace requirements",
-            "Use template guidance to categorize parent vs variant level data",
+            "Categorize fields as parent-level (shared) or variant-level (unique per item)",
             "Only map with confidence >70%",
             "Provide clear reasoning for each mapping decision",
             "Prioritize exact matches over approximate matches"
@@ -135,7 +166,7 @@ Variant-level fields (unique per variant): {list(variant_fields.keys())[:10]}
                 "feed_product_type": "LIGHTING_FIXTURE",
                 "manufacturer": "EIKO Global LLC"
             },
-            "variance_data": {
+            "variant_data": {
                 "variant_1": {
                     "item_sku": f"{parent_sku}-001",
                     "color_name": "White",
@@ -157,26 +188,29 @@ Variant-level fields (unique per variant): {list(variant_fields.keys())[:10]}
         
         return self.create_output_format_section(format_example)
     
-    def create_simple_mapping_prompt(
+    def create_comprehensive_mapping_prompt(
         self,
         parent_sku: str,
         mandatory_fields: Dict[str, Any],
-        product_data: Dict[str, Any]
+        product_data: Dict[str, Any],
+        template_structure: Optional[Dict[str, Any]] = None
     ) -> str:
-        """Create simplified mapping prompt without template guidance.
+        """Create comprehensive mapping prompt with full context.
         
         Args:
             parent_sku: Parent SKU identifier
             mandatory_fields: Mandatory fields dictionary
             product_data: Product data dictionary
+            template_structure: Template structure from step4_template.json
             
         Returns:
-            Simplified mapping prompt
+            Comprehensive mapping prompt
         """
         context = {
             'parent_sku': parent_sku,
             'mandatory_fields': mandatory_fields,
-            'product_data': product_data
+            'product_data': product_data,
+            'template_structure': template_structure
         }
         
         return self.render_mapping_prompt(context)
@@ -208,3 +242,4 @@ Focus on providing a complete, well-structured response.
 """
         
         return base_prompt + retry_guidance
+    

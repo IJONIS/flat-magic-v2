@@ -118,6 +118,8 @@ class SkuPatternAnalyzer:
             step4_file = flat_file_dir / "step4_template.json"
             if step3_file.exists() and not step4_file.exists():
                 missing_files.append(f"Flat File Step 4: {step4_file}")
+            
+            # Step 4.1 no longer required - structure example generated internally
         
         # Step 2 & 3: Check per-parent files exist (only when CSV export is enabled)
         if relationships and export_csv:
@@ -167,6 +169,7 @@ class SkuPatternAnalyzer:
                 flat_file_steps.append("step3")
             if (flat_file_dir / "step4_template.json").exists():
                 flat_file_steps.append("step4")
+            # Step 4.1 no longer tracked - structure example generated internally
             validation_scope.append(f"flat file analysis ({'+'.join(flat_file_steps)})")
         if relationships and export_csv:
             validation_scope.append(f"{len(relationships)} CSV files")
@@ -337,6 +340,11 @@ class SkuPatternAnalyzer:
                 # Step 4: Generate template structure if step 3 exists
                 if step3_mandatory_path.exists():
                     await self._generate_template_structure(step3_mandatory_path, flat_file_dir, job_id)
+                    
+                    # Step 4.1: Generate structure enforcer example (after Step 4 completes)
+                    step4_template_path = flat_file_dir / "step4_template.json"
+                    if step4_template_path.exists():
+                        await self._generate_structure_enforcer_example(output_dir, job_id)
             else:
                 self.logger.warning("⚠️ Skipping Steps 3-4: Step 1 or Step 2 output missing")
             
@@ -394,6 +402,52 @@ class SkuPatternAnalyzer:
         except Exception as e:
             self.logger.error(f"Template structure generation failed for job {job_id}: {e}")
             # Don't raise - template generation is optional, analysis can continue
+    
+    async def _generate_structure_enforcer_example(
+        self,
+        output_dir: Path,
+        job_id: str
+    ) -> None:
+        """Generate Step 4.1 structure enforcer example for AI mapping compliance.
+        
+        Args:
+            output_dir: Job output directory
+            job_id: Current job ID
+        """
+        try:
+            self.logger.info("🔧 Generating template structure enforcer example (Step 4.1)")
+            
+            # Import structure enforcer
+            from ..step4_1_enforcer.structure_enforcer import TemplateStructureEnforcer
+            
+            # Initialize structure enforcer
+            enforcer = TemplateStructureEnforcer()
+            
+            # Process template structure enforcement
+            structure_example = enforcer.process_template_structure(output_dir)
+            
+            # Log structure enforcement results
+            field_categorization = structure_example.get('field_categorization', {})
+            coverage = field_categorization.get('coverage_validation', {})
+            parent_count = coverage.get('parent_coverage', 0)
+            variant_count = coverage.get('variant_coverage', 0)
+            total_count = coverage.get('parent_coverage', 0) + coverage.get('variant_coverage', 0)
+            
+            self.logger.info(
+                f"✅ Step 4.1: Structure enforcer completed - "
+                f"{parent_count} parent fields, {variant_count} variant fields, "
+                f"{total_count}/23 total field coverage"
+            )
+            
+            # Warn if coverage is incomplete
+            if not coverage.get('coverage_complete', False):
+                self.logger.warning(
+                    f"⚠️ Step 4.1: Incomplete field coverage - {total_count}/23 fields"
+                )
+            
+        except Exception as e:
+            self.logger.error(f"Structure enforcer generation failed for job {job_id}: {e}")
+            # Don't raise - structure enforcer is optional for backward compatibility
     
     async def add_ai_mapping_to_job(
         self,
@@ -538,8 +592,36 @@ class SkuPatternAnalyzer:
                         template_path, job_id, output_dir
                     )
                 
+                # Phase 3: AI Mapping (if template analysis was performed)
+                ai_mapping_performed = False
+                if has_template_analysis:
+                    job.status = "ai_mapping"
+                    self.logger.info("🤖 Starting AI mapping (Step 5) for all parent directories")
+                    
+                    try:
+                        from ..step5_mapping.processor import MappingProcessor
+                        
+                        # Initialize AI mapping processor
+                        mapping_processor = MappingProcessor()
+                        
+                        # Process all parent directories
+                        result = await mapping_processor.process_all_parents(output_dir)
+                        
+                        ai_mapping_performed = True
+                        self.logger.info(f"✅ AI mapping completed: {result.total_processed} parents processed")
+                        
+                    except Exception as e:
+                        self.logger.warning(f"⚠️ AI mapping failed: {e}")
+                        self.logger.info("Pipeline will continue without AI mapping")
+                
                 # Validate all expected files exist after pipeline completion
-                self.completion_check(output_dir, relationships, export_csv, validate_flat_file=has_template_analysis)
+                self.completion_check(
+                    output_dir, 
+                    relationships, 
+                    export_csv, 
+                    validate_flat_file=has_template_analysis,
+                    validate_ai_mapping=ai_mapping_performed
+                )
                 
                 job.status = "completed"
                 
@@ -556,6 +638,8 @@ class SkuPatternAnalyzer:
                 if template_result:
                     mapping_count = template_result.get('total_mappings', 0)
                     integration_summary.append(f"Template analysis ({mapping_count} column mappings)")
+                if ai_mapping_performed:
+                    integration_summary.append(f"AI mapping ({len(relationships)} parents processed)")
                 
                 self.logger.info(f"🏗️ Integrated analysis completed: {', '.join(integration_summary)}")
                 

@@ -6,7 +6,7 @@ the AI mapping workflow.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 from pydantic import BaseModel, Field
 
 
@@ -16,8 +16,8 @@ class MappingInput(BaseModel):
     parent_sku: str = Field(..., description="Parent SKU identifier")
     mandatory_fields: Dict[str, Any] = Field(..., description="Mandatory fields schema")
     product_data: Dict[str, Any] = Field(..., description="Source product data")
+    template_structure: Optional[Dict[str, Any]] = Field(default=None, description="Template structure from step4_template.json")
     business_context: str = Field(default="German Amazon marketplace product", description="Business context")
-    template_structure: Optional[Dict[str, Any]] = Field(None, description="Template structure for guidance")
 
 
 class MappingResult(BaseModel):
@@ -31,16 +31,12 @@ class MappingResult(BaseModel):
 
 
 class TransformationResult(BaseModel):
-    """Complete transformation result for a parent SKU."""
+    """Result of AI mapping transformation with structured variant data."""
     
-    parent_sku: str = Field(..., description="Parent SKU identifier")
-    parent_data: Dict[str, Any] = Field(default_factory=dict, description="Parent-level mapped data")
-    variance_data: Dict[str, Any] = Field(default_factory=dict, description="Variant-level data")
-    mapped_fields: List[MappingResult] = Field(default_factory=list, description="Individual mapping results")
-    metadata: Dict[str, Any] = Field(default_factory=dict, description="Processing metadata")
-    
-    class Config:
-        arbitrary_types_allowed = True
+    parent_sku: str = Field(description="Parent SKU identifier")
+    parent_data: Dict[str, Any] = Field(default_factory=dict, description="Parent product data")
+    variant_data: Dict[str, Any] = Field(default_factory=dict, description="Variant-level data")
+    metadata: Union[Dict[str, Any], str] = Field(default_factory=dict, description="Processing metadata")
 
 
 class ProcessingConfig(BaseModel):

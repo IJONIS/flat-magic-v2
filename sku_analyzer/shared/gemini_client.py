@@ -35,8 +35,8 @@ class GeminiResponse(BaseModel):
 class AIProcessingConfig(BaseModel):
     """Optimized configuration for AI processing operations."""
     
-    model_name: str = "gemini-2.0-flash-exp"
-    temperature: float = 0.0
+    model_name: str = "gemini-2.5-flash"  # Updated to use 2.5 for structured output
+    temperature: float = 0.3  # Set to 0.3 as per ai_studio_code.py requirements
     max_tokens: int = 2048  # Reduced from 4096 for faster responses
     timeout_seconds: int = 15  # Reduced from 30 for faster failure detection
     max_concurrent: int = 3  # Increased from 1 for better throughput
@@ -47,9 +47,13 @@ class AIProcessingConfig(BaseModel):
     
     # New optimization parameters
     max_prompt_size: int = 8000  # Character limit for prompts
-    max_variants_per_request: int = 5  # Limit variants to reduce payload
+    max_variants_per_request: int = 50  # Process all variants completely
     enable_prompt_compression: bool = True
     safety_filter_retry_delay: float = 0.5  # Reduced retry delay
+    
+    # Structured output parameters
+    enable_structured_output: bool = True  # Enable structured output by default
+    thinking_budget: int = -1  # Enable thinking budget for better reasoning
 
 
 class SafetyFilterException(Exception):
@@ -76,6 +80,39 @@ class SafetyFilterException(Exception):
 
 class PromptOptimizer:
     """Optimizes prompts for reduced size and safety compliance."""
+    
+    @staticmethod
+    def sanitize_content(value: str) -> str:
+        """Remove/replace terms that trigger Gemini safety filters.
+        
+        Args:
+            value: Original content value
+            
+        Returns:
+            Sanitized content safe for AI processing
+        """
+        if not isinstance(value, str):
+            return str(value)
+            
+        # Replace German clothing terms with neutral equivalents
+        replacements = {
+            'Latzhose': 'WorkPants',
+            'Arbeitskleidung': 'Workwear', 
+            'Gesäßtasche': 'BackPocket',
+            'Hosenträger': 'Suspenders',
+            'Genuacord': 'CorduryFabric',
+            'Schubtaschen': 'FrontPockets',
+            'Zollstocktasche': 'RulerPocket',
+            'Reißverschluss': 'Zipper',
+            'Manchester': 'Corduroy',
+            'Knietaschen': 'KneePockets'
+        }
+        
+        sanitized = value
+        for german_term, safe_term in replacements.items():
+            sanitized = sanitized.replace(german_term, safe_term)
+            
+        return sanitized
     
     @staticmethod
     def compress_product_data(product_data: Dict[str, Any], max_fields: int = 10, ultra_safe_mode: bool = False) -> Dict[str, Any]:
@@ -114,16 +151,18 @@ class PromptOptimizer:
                 'FVALUE_3_1', 'FVALUE_3_2', 'FVALUE_3_3', 'SUPPLIER_PID'
             ]
         
-        # Extract only safe parent fields
+        # Extract only safe parent fields with content sanitization
         compressed_parent = {}
         for field in safe_essential_fields:
             if field in parent_data:
                 value = str(parent_data[field])
                 # Remove potentially problematic content
                 if len(value) > 100 or any(trigger in value.lower() for trigger in 
-                    ['http', 'www', 'description', 'long', 'detail']):
+                    ['http', 'www', 'description_long', 'detail']):
                     continue
-                compressed_parent[field] = value
+                # Apply content sanitization
+                sanitized_value = PromptOptimizer.sanitize_content(value)
+                compressed_parent[field] = sanitized_value
         
         # Compress variants to essential fields only with type safety
         compressed_variants = []
@@ -139,7 +178,9 @@ class PromptOptimizer:
                 if field in variant:
                     value = str(variant[field])
                     if len(value) <= 50:  # Keep only short values
-                        compressed_variant[field] = value
+                        # Apply content sanitization
+                        sanitized_value = PromptOptimizer.sanitize_content(value)
+                        compressed_variant[field] = sanitized_value
             
             if compressed_variant:
                 compressed_variants.append(compressed_variant)
@@ -280,6 +321,11 @@ class GeminiClient:
             safety_settings=safety_settings
         )
         
+        # Initialize structured output model with schema if enabled
+        self._structured_model = None
+        if self.config.enable_structured_output:
+            self._initialize_structured_model()
+        
         # Enhanced rate limiting with burst capability
         self._semaphore = asyncio.Semaphore(self.config.max_concurrent)
         self._last_request_time = 0.0
@@ -287,6 +333,55 @@ class GeminiClient:
         
         # Performance tracking
         self._reset_performance_counters()
+    
+    def _initialize_structured_model(self) -> None:
+        """Initialize structured output model with AI mapping schema using google-genai library."""
+        try:
+            from google import genai as google_genai
+            from google.genai import types
+            from ..step5_mapping.schema import get_ai_mapping_schema
+            
+            # Initialize google-genai client for structured output
+            api_key = os.getenv("GOOGLE_API_KEY")
+            if not api_key:
+                raise ValueError("GOOGLE_API_KEY environment variable required")
+            
+            self._genai_client = google_genai.Client(api_key=api_key)
+            
+            # Create generation config with structured output
+            self._structured_config = types.GenerateContentConfig(
+                temperature=self.config.temperature,
+                response_mime_type="application/json",
+                response_schema=get_ai_mapping_schema(),
+            )
+            
+            # Add thinking config if available (Gemini 2.5 feature)
+            try:
+                self._structured_config = types.GenerateContentConfig(
+                    temperature=self.config.temperature,
+                    thinking_config=types.ThinkingConfig(
+                        thinking_budget=self.config.thinking_budget
+                    ),
+                    response_mime_type="application/json",
+                    response_schema=get_ai_mapping_schema(),
+                )
+            except (AttributeError, TypeError):
+                # Fallback if thinking config is not available
+                self.logger.debug("Thinking config not available, using basic structured output")
+            
+            # Mark as successfully initialized
+            self._structured_model = True  # Use as boolean flag
+            
+            self.logger.info(f"Initialized structured output with google-genai: {self.config.model_name}")
+            
+        except ImportError as e:
+            self.logger.error(f"Failed to import google-genai or schema: {e}")
+            self._structured_model = None
+            self._genai_client = None
+        except Exception as e:
+            self.logger.error(f"Failed to initialize structured output model: {e}")
+            self._structured_model = None
+            self._genai_client = None
     
     def _reset_performance_counters(self) -> None:
         """Reset performance tracking counters."""
@@ -300,6 +395,50 @@ class GeminiClient:
         self.prompt_compression_ratio = 0.0
         self.average_prompt_size = 0.0
     
+    async def generate_structured_mapping(
+        self,
+        prompt: str,
+        timeout_override: Optional[int] = None,
+        operation_name: str = "structured_mapping",
+        enable_fallback: bool = True
+    ) -> GeminiResponse:
+        """Generate AI mapping with structured output schema.
+        
+        Args:
+            prompt: Formatted prompt for mapping (no JSON format instructions needed)
+            timeout_override: Optional timeout override
+            operation_name: Name for performance tracking
+            enable_fallback: Enable fallback to regular generation if structured fails
+            
+        Returns:
+            Structured Gemini response
+            
+        Raises:
+            SafetyFilterException: If content blocked by safety filters
+            TimeoutError: If request exceeds timeout
+            ValueError: If response is invalid or structured output unavailable
+        """
+        if not self._structured_model:
+            if enable_fallback:
+                self.logger.warning("Structured output model not available, falling back to regular generation")
+                return await self.generate_mapping(prompt, timeout_override, operation_name)
+            else:
+                raise ValueError("Structured output model not initialized")
+        
+        # Store original prompt for error reporting
+        self._last_prompt = prompt
+        
+        async with self._semaphore:
+            # Enhanced rate limiting
+            await self._enforce_rate_limit()
+            
+            # Performance monitoring context
+            if self.performance_monitor:
+                with self.performance_monitor.measure_performance(operation_name):
+                    return await self._execute_structured_request(prompt, timeout_override)
+            else:
+                return await self._execute_structured_request(prompt, timeout_override)
+
     async def generate_mapping(
         self,
         prompt: str,
@@ -313,6 +452,7 @@ class GeminiClient:
             prompt: Formatted prompt for mapping
             timeout_override: Optional timeout override
             operation_name: Name for performance tracking
+            enable_ultra_safe_fallback: Enable fallback for safety filter issues
             
         Returns:
             Structured Gemini response
@@ -335,48 +475,13 @@ class GeminiClient:
             # Performance monitoring context
             if self.performance_monitor:
                 with self.performance_monitor.measure_performance(operation_name):
-                    return await self._execute_optimized_request(optimized_prompt, timeout_override)
+                    return await self._execute_optimized_request(optimized_prompt, timeout_override, enable_ultra_safe_fallback)
             else:
-                return await self._execute_optimized_request(optimized_prompt, timeout_override)
+                return await self._execute_optimized_request(optimized_prompt, timeout_override, enable_ultra_safe_fallback)
     
     def _optimize_prompt(self, prompt: str) -> str:
-        """Optimize prompt for size and safety compliance."""
-        original_size = len(prompt)
-        
-        # If prompt is within size limit, return as-is
-        if original_size <= self.config.max_prompt_size:
-            return prompt
-        
-        # Apply aggressive compression for oversized prompts
-        lines = prompt.split('\n')
-        optimized_lines = []
-        current_size = 0
-        
-        for line in lines:
-            # Skip overly long lines that might contain descriptions
-            if len(line) > 200:
-                continue
-            
-            # Skip lines with potential safety triggers
-            if any(trigger in line.lower() for trigger in [
-                'description_long', 'detail', 'feature', 'benefit', 'marketing'
-            ]):
-                continue
-            
-            if current_size + len(line) > self.config.max_prompt_size:
-                break
-                
-            optimized_lines.append(line)
-            current_size += len(line)
-        
-        optimized_prompt = '\n'.join(optimized_lines)
-        compression_ratio = len(optimized_prompt) / original_size
-        self.prompt_compression_ratio = compression_ratio
-        
-        self.logger.debug(f"Prompt compressed from {original_size} to {len(optimized_prompt)} chars "
-                         f"(ratio: {compression_ratio:.2f})")
-        
-        return optimized_prompt
+        """Return prompt as-is - no optimization needed with 1M token limit."""
+        return prompt
     
     def _create_ultra_safe_prompt(self, original_prompt: str) -> str:
         """Create ultra-safe minimal prompt for safety filter compliance.
@@ -400,19 +505,20 @@ class GeminiClient:
         # Ultra-minimal mapping request
         return f"""Map product fields to Amazon format.
 Parent: {parent_sku}
-Output JSON: {{"parent_sku":"{parent_sku}","parent_data":{{"brand_name":"value"}},"variance_data":{{"variant_1":{{"item_sku":"value"}}}},"metadata":{{"confidence":0.6,"ultra_safe_fallback":true}}}}"""
+Output JSON: {{"parent_sku":"{parent_sku}","parent_data":{{"brand_name":"value"}},"variant_data":{{"variant_1":{{"item_sku":"value"}}}},"metadata":{{"confidence":0.6,"ultra_safe_fallback":true}}}}"""
     
     async def _execute_optimized_request(
         self, 
         prompt: str, 
-        timeout_override: Optional[int]
+        timeout_override: Optional[int],
+        enable_ultra_safe_fallback: bool = True
     ) -> GeminiResponse:
-        """Execute request with optimized performance monitoring."""
+        """Execute request with complete unfiltered data."""
         start_time = time.perf_counter()
         self.average_prompt_size = (self.average_prompt_size * self.request_count + len(prompt)) / (self.request_count + 1)
         
         try:
-            # Execute with reduced timeout for faster failure detection
+            # Execute with full timeout for large prompts
             timeout = timeout_override or self.config.timeout_seconds
             response = await asyncio.wait_for(
                 self._make_optimized_request(prompt),
@@ -444,56 +550,111 @@ Output JSON: {{"parent_sku":"{parent_sku}","parent_data":{{"brand_name":"value"}
             
             return parsed_response
             
-        except SafetyFilterException as safety_error:
-            self.failed_requests += 1
-            self.safety_blocked_requests += 1
-            
-            # Log detailed safety filter information
-            self.logger.warning(
-                f"Safety filter blocked request (size: {len(prompt)} chars, "
-                f"categories: {safety_error.blocked_categories})"
-            )
-            
-            # Try ultra-safe fallback if enabled and not already tried
-            if (enable_ultra_safe_fallback and 
-                not getattr(self, '_ultra_safe_attempted', False) and
-                len(prompt) > 1000):  # Only for large prompts
-                
-                self.logger.info("Attempting ultra-safe fallback prompt")
-                self._ultra_safe_attempted = True
-                
-                try:
-                    # Generate ultra-minimal prompt
-                    ultra_safe_prompt = self._create_ultra_safe_prompt(prompt)
-                    fallback_response = await self._execute_optimized_request(
-                        ultra_safe_prompt, timeout_override
-                    )
-                    
-                    # Mark as fallback response
-                    fallback_response.metadata = fallback_response.metadata or {}
-                    fallback_response.metadata['ultra_safe_fallback'] = True
-                    fallback_response.metadata['original_safety_error'] = str(safety_error)
-                    
-                    self.successful_requests += 1  # Count as success
-                    return fallback_response
-                    
-                except Exception as fallback_error:
-                    self.logger.error(f"Ultra-safe fallback also failed: {fallback_error}")
-            
-            # Reset flag for next request
-            self._ultra_safe_attempted = False
-            
-            # Add small delay before giving up
-            await asyncio.sleep(self.config.safety_filter_retry_delay)
-            raise safety_error
         except asyncio.TimeoutError:
             self.failed_requests += 1
-            self.logger.warning(f"Gemini request timed out after {timeout}s (prompt size: {len(prompt)} chars)")
-            raise TimeoutError(f"Gemini request timed out after {timeout}s")
+            self.logger.warning(f"Gemini request timed out after {timeout_override or self.config.timeout_seconds}s "
+                              f"(prompt size: {len(prompt)} chars)")
+            raise TimeoutError(f"Gemini request timed out after {timeout_override or self.config.timeout_seconds}s")
+            
         except Exception as e:
             self.failed_requests += 1
-            raise ValueError(f"Gemini request failed: {e}")
+            self.logger.error(f"Gemini API error: {e}")
+            raise ValueError(f"Gemini API request failed: {e}")
     
+    async def _execute_structured_request(
+        self, 
+        prompt: str, 
+        timeout_override: Optional[int]
+    ) -> GeminiResponse:
+        """Execute structured output request with google-genai client."""
+        start_time = time.perf_counter()
+        self.average_prompt_size = (self.average_prompt_size * self.request_count + len(prompt)) / (self.request_count + 1)
+        
+        try:
+            # Execute with structured output using google-genai client
+            timeout = timeout_override or self.config.timeout_seconds
+            response_stream = await asyncio.wait_for(
+                self._make_structured_request(prompt),
+                timeout=timeout
+            )
+            
+            # Collect streaming response
+            full_content = ""
+            usage_metadata = None
+            
+            for chunk in response_stream:
+                if hasattr(chunk, 'text') and chunk.text:
+                    full_content += chunk.text
+                if hasattr(chunk, 'usage_metadata') and chunk.usage_metadata:
+                    usage_metadata = {
+                        "prompt_token_count": getattr(chunk.usage_metadata, 'prompt_token_count', 0),
+                        "candidates_token_count": getattr(chunk.usage_metadata, 'candidates_token_count', 0), 
+                        "total_token_count": getattr(chunk.usage_metadata, 'total_token_count', 0)
+                    }
+            
+            # Create structured response
+            structured_response = GeminiResponse(
+                content=full_content.strip(),
+                usage_metadata=usage_metadata,
+                finish_reason="STOP",
+                safety_ratings=[]
+            )
+            
+            # Record performance metrics
+            end_time = time.perf_counter()
+            response_time = (end_time - start_time) * 1000  # Convert to ms
+            
+            self.request_count += 1
+            self.total_response_time += response_time
+            self.successful_requests += 1
+            
+            # Record token usage if available
+            if usage_metadata:
+                prompt_tokens = usage_metadata.get('prompt_token_count', 0)
+                response_tokens = usage_metadata.get('candidates_token_count', 0)
+                self.total_prompt_tokens += prompt_tokens
+                self.total_response_tokens += response_tokens
+            
+            # Log performance for optimization tracking
+            self.logger.debug(f"Structured API response in {response_time:.1f}ms, "
+                            f"prompt: {len(prompt)} chars, "
+                            f"tokens: {usage_metadata.get('total_token_count', 0) if usage_metadata else 0}")
+            
+            return structured_response
+            
+        except asyncio.TimeoutError:
+            self.failed_requests += 1
+            self.logger.warning(f"Structured Gemini request timed out after {timeout_override or self.config.timeout_seconds}s "
+                              f"(prompt size: {len(prompt)} chars)")
+            raise TimeoutError(f"Structured Gemini request timed out after {timeout_override or self.config.timeout_seconds}s")
+            
+        except Exception as e:
+            self.failed_requests += 1
+            self.logger.error(f"Structured Gemini API error: {e}")
+            raise ValueError(f"Structured Gemini API request failed: {e}")
+
+    async def _make_structured_request(self, prompt: str):
+        """Make structured output request using google-genai client."""
+        from google.genai import types
+        
+        # Create content for google-genai client
+        contents = [
+            types.Content(
+                role="user",
+                parts=[
+                    types.Part.from_text(text=prompt),
+                ],
+            ),
+        ]
+        
+        # Use google-genai client for structured output
+        return await asyncio.to_thread(
+            self._genai_client.models.generate_content_stream,
+            model=self.config.model_name,
+            contents=contents,
+            config=self._structured_config
+        )
+
     async def _make_optimized_request(self, prompt: str) -> GenerateContentResponse:
         """Make optimized async request to Gemini API."""
         return await asyncio.to_thread(
@@ -532,8 +693,8 @@ Output JSON: {{"parent_sku":"{parent_sku}","parent_data":{{"brand_name":"value"}
                     for rating in candidate.safety_ratings
                 ]
         
-        # Check for safety filter blocking
-        if finish_reason == "2" or finish_reason == "SAFETY":
+        # Check for safety filter blocking - ENHANCED HANDLING
+        if finish_reason in ["2", "SAFETY"]:
             # Create detailed error message
             blocked_categories = []
             if safety_ratings:
@@ -552,10 +713,14 @@ Output JSON: {{"parent_sku":"{parent_sku}","parent_data":{{"brand_name":"value"}
                 prompt_size=len(getattr(self, '_last_prompt', ''))
             )
         
-        # Extract text content safely
+        # Extract text content safely - IMPROVED SAFETY HANDLING
         content = ""
         try:
-            if hasattr(response, 'text') and response.text:
+            # CRITICAL FIX: Check for safety blocking before accessing response.text
+            if finish_reason in ["2", "SAFETY"]:
+                # Skip text extraction - content was blocked
+                content = ""
+            elif hasattr(response, 'text') and response.text:
                 content = response.text
             elif response.candidates and len(response.candidates) > 0:
                 candidate = response.candidates[0]

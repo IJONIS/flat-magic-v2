@@ -77,12 +77,12 @@ class FormatEnforcer:
                 warnings.append("Invalid parent_data structure - using empty dict")
             
             # Extract variant data
-            variance_data = mapping_result.get("variance_data", {})
+            variant_data = mapping_result.get("variant_data", {})
             variants = []
             
-            if isinstance(variance_data, dict):
-                # Convert variance_data to variants list
-                for variant_id, variant_data in variance_data.items():
+            if isinstance(variant_data, dict):
+                # Convert variant_data to variants list
+                for variant_id, variant_data in variant_data.items():
                     if isinstance(variant_data, dict):
                         variant_entry = {
                             "variant_id": variant_id,
@@ -101,7 +101,7 @@ class FormatEnforcer:
                     "total_variants": len(variants),
                     "mapping_confidence": metadata.get("confidence", 0.0),
                     "processing_notes": metadata.get("processing_notes", "AI mapping completed"),
-                    "unmapped_mandatory_fields": metadata.get("unmapped_mandatory", [])
+                    "unmapped_mandatory_fields": metadata.get("unmapped_mandatory_fields", metadata.get("unmapped_mandatory", []))
                 })
             else:
                 warnings.append("Invalid metadata structure - using defaults")
@@ -197,7 +197,7 @@ class FormatEnforcer:
             "total_variants": 0,
             "mapping_confidence": 0.0,
             "processing_notes": "Default metadata values used",
-            "unmapped_mandatory_fields": []
+            "unmapped_mandatory_fields": []  # Preserve validation results if available
         }
         return defaults.get(field, None)
     
